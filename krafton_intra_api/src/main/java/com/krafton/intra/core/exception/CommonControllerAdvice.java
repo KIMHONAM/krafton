@@ -47,7 +47,7 @@ public class CommonControllerAdvice {
 
     public ResponseEntity<ApiResponse> errorResponse(Exception e, String errorMessage, String errorCode) {
         LOGGER.error(e.getMessage(), e);
-        return ResponseEntity.ok(ApiResponse.builder().errorCode(errorCode).errorMessage(errorMessage).isSuccess(false).data("").build());
+        return ResponseEntity.ok(ApiResponse.builder().errorCode(errorCode).errorMessage(errorMessage).isSuccess(false).payload("").build());
     }
 
 }

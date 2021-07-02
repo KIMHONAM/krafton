@@ -19,28 +19,28 @@ public class PTOController {
     @GetMapping("/info/id/{id}")
     public ResponseEntity<Object> getUserPTOInformation(@PathVariable int id) {
         Object obj = ptoService.getEmployeePTOInfo(id);
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(obj).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(obj).build());
     }
 
     // 휴가 신청
     @PostMapping("/id/{id}")
     public ResponseEntity<Object> applicatePTO(@PathVariable int id, @RequestBody ApiRequest ptoRequest) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
     }
 
     // 휴가 일정 조회
     @GetMapping("/calendar/id/{id}")
     public ResponseEntity<Object> getPTOSchedule(@PathVariable int id) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
     }
 
     // 휴가 취소 가능 리스트 조회
     @GetMapping("/cancel/id/{id}")
     public ResponseEntity<Object> getCancellablePTOs(@PathVariable int id) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
     }
 
     // 휴가 취소
@@ -53,7 +53,7 @@ public class PTOController {
     @GetMapping("/list/id/{id}")
     public ResponseEntity<Object> getUserPTOList(@PathVariable int id) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
     }
 
     // 휴가 구분 조회
