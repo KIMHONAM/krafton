@@ -1,4 +1,4 @@
-package com.krafton.intra.core.dto.exception;
+package com.krafton.intra.core.exception;
 
 import com.krafton.intra.core.dto.ApiResponse;
 import org.apache.logging.log4j.LogManager;
