@@ -20,9 +20,9 @@ public class PTOResponse {
     public static class EmployeePTODto {
 
         EmployeeResponse.EmployeeDto employee;
-        private long occurDays;
-        private long useDays;
-        private long unusedDays;
+        private float occurDays;
+        private float useDays;
+        private float unusedDays;
     }
 
     @Data
