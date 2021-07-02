@@ -14,12 +14,24 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 @RestControllerAdvice
-public class KraftonControllerAdvice {
+public class CommonControllerAdvice {
 
-    private static final Logger LOGGER = LogManager.getLogger(KraftonControllerAdvice.class);
+    private static final Logger LOGGER = LogManager.getLogger(CommonControllerAdvice.class);
 
     @Resource(name = "messageSourceAccessor")
     protected MessageSourceAccessor message;
+
+    @ExceptionHandler(value = BusinessException.class)
+    public ResponseEntity<ApiResponse> handleBusinessException(HttpServletRequest request, Exception e){
+        String errorCode = "";
+        String errorMessage = "";
+        try {
+            errorMessage = message.getMessage(errorCode, Locale.KOREA);
+        } catch (NoSuchMessageException ee) {
+            errorMessage = e.getMessage();
+        }
+        return errorResponse(e, errorMessage, errorCode);
+    }
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse> handleEtcException(HttpServletRequest request, Exception e){
