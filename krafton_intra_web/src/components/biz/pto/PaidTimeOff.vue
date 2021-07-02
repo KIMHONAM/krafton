@@ -75,7 +75,7 @@
                     >
                       <v-text-field
                         label="사용연차(일)"
-                        v-model="user.pto.used"
+                        v-model="user.pto.useDays"
                         disabled
                       ></v-text-field>
                   </v-col>
@@ -86,7 +86,7 @@
                     >
                       <v-text-field
                         label="잔여연차(일)"
-                        v-model="user.pto.unused"
+                        v-model="user.pto.unusedDays"
                         disabled
                       ></v-text-field>
                   </v-col>
@@ -410,17 +410,17 @@ export default {
 
         // 사용자 기본정보 더미
         user: {
-            name: '홍길동',
-            compNo: 'K0001',
-            deptName: '인트라플랫폼팀',
-            role: '팀원',
-            joinDate: '2020.01.01',
+            name: '',
+            compNo: '',
+            deptName: '',
+            role: '',
+            joinDate: '',
             pto: {
-                days: '3',
-                type: '연차',
-                all: 15,
-                used: 3,
-                unused: 12
+                days: '',
+                type: '',
+                all: '',
+                used: '',
+                unused: ''
             }
         },
 
@@ -562,22 +562,28 @@ export default {
         async getUserInfo () {
             let userId = process.env.VUE_APP_TEST_USER_ID;
             let apiUrl = this.$apiUrls.GET_PTO_INFO.replace('{id}',userId)
+            
             await this.axios.get(apiUrl).then((response) => {
-              console.log(response.data)
-              /*user: {
-                  name: '홍길동',
-                  compNo: 'K0001',
-                  deptName: '인트라플랫폼팀',
-                  role: '팀원',
-                  joinDate: '2020.01.01',
-                  pto: {
-                      days: '3',
-                      type: '연차',
-                      all: 15,
-                      used: 3,
-                      unused: 12
-                  }
-              },*/
+
+
+              let data = response.data;
+              
+              if(data.isSuccess){
+
+                this.user.name = data.payload.employee.name;
+                this.user.compNo = data.payload.employee.employeeNumber;
+                
+                this.user.deptName = data.payload.employee.departmentName;
+                this.user.role = data.payload.employee.position;
+                
+                this.user.joinDate = data.payload.employee.hireDate;
+                this.user.pto.all = data.payload.occurDays;
+                this.user.pto.unusedDays = data.payload.unusedDays;
+                this.user.pto.useDays = data.payload.useDays;
+
+              }else{
+                alert(data.errorMessage);
+              }
             })
         }
       },
