@@ -10,9 +10,11 @@ public class PTOSqlProvider implements ProviderMethodResolver {
         return new SQL(){{
             SELECT("a.id, a.department_code, a.hire_date, a.name, a.employee_number");
             SELECT("b.department_name, c.role_name as position");
+            SELECT("d.occur_days, d.use_days, d.unused_days");
             FROM("employee a");
             INNER_JOIN("department b on a.department_code = b.department_code");
             INNER_JOIN("employee_role c on a.position_id = c.id");
+            LEFT_OUTER_JOIN("employee_pto_summary d on a.id = d.employee_id");
             WHERE("a.id =  #{id}");
         }}.toString();
     }

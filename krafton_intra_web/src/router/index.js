@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import PaidTimeOff from '../components/biz/PaidTimeOff.vue'
+import PaidTimeOff from '../components/biz/pto/PaidTimeOff.vue'
 
 Vue.use(VueRouter)
 

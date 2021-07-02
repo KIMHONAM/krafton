@@ -1,7 +1,8 @@
 package com.krafton.intra.pto.dao;
 
-import com.krafton.intra.employee.dto.EmployeeRequest;
+import com.krafton.intra.employee.dto.EmployeeResponse;
+import com.krafton.intra.pto.dto.PTOResponse;
 
 public interface PTODao {
-    public EmployeeRequest.EmployeeDto select(int id);
+    public Object select(int id);
 }

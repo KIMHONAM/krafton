@@ -47,6 +47,9 @@
 </template>
 
 <script>
+
+import constants from '@/constants/holiday'
+
 export default {
     name: 'DatePicker',
     props: {
@@ -65,7 +68,7 @@ export default {
         }
     },
     methods: {
-        allowedDates: val => new Date(val).getDay() !== 0 && new Date(val).getDay() !== 6,
+        allowedDates: val => new Date(val).getDay() !== 0 && new Date(val).getDay() !== 6 && !constants.HOLIDAY_MAP.has(val.replace(/-/gi,'')),
     },
     mounted() {
         console.log(typeof this.range)

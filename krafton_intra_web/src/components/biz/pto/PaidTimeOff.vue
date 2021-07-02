@@ -1,7 +1,8 @@
 <template>
 <div>
+  
   <v-container>
-  <v-row>
+  <v-row >
     <v-col cols="4">
     <v-card elevation="5"
               tile
@@ -101,31 +102,39 @@
         <v-card elevation="5"
               height="100%"
                 tile>
-            <v-card-title>휴가 신청
-            <v-spacer></v-spacer>
-            <v-btn
+            <v-card-title>휴가 신청 <v-btn
                          color="#999999"
                          text
                          @click="calendarDialog = true"
                        >
                          <v-icon>mdi-calendar-search</v-icon>일정보기
                        </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+                                     color="#1f202d darken-1"
+                                     text
+                                     @click="dialog = false"
+                                   >
+                                     <v-icon>mdi-calendar-import</v-icon> 휴가 신청
+                                   </v-btn>            
             </v-card-title>
+            
+            <v-container>
+            <v-row>
             <v-col cols="12">
                 <date-picker :range="true" paramLabel="*연차 시작,종료일을 선택해주세요."></date-picker>
               </v-col>
-              <v-col
-                cols="12"
-              >
+              <v-col cols="6"
+                    sm="6"
+                    md="6">
                 <v-select
                   :items="['오전 반차', '오후 반차', '연차']"
                   label="*휴가 구분"
                   required
                 ></v-select>
               </v-col>
-              <v-col
-                cols="12"
-              >
+              
+              <v-col cols="12">
               <v-textarea
                         label="휴가 사유"
                         value="개인 사유"
@@ -133,24 +142,22 @@
                         rows="1"
                       ></v-textarea>
               </v-col>
-              <v-card-actions>
-                  <v-col class="text-right">
-                    <v-btn
-                                     color="black darken-1"
-                                     text
-                                     @click="dialog = false"
-                                   >
-                                     <v-icon>mdi-calendar-import</v-icon> 휴가 신청
-                                   </v-btn>
-                  </v-col>
-              </v-card-actions>
+              </v-row>
+            </v-container>
         </v-card>
     </v-col>
     <v-col cols="4">
             <v-card elevation="5"
               height="100%"
                     tile>
-                <v-card-title>휴가 취소
+                <v-card-title>휴가 취소 <v-spacer></v-spacer>
+                <v-btn
+                                     color="#BC544B"
+                                     text
+                                     @click="testAxios"
+                                   >
+                                     <v-icon>mdi-calendar-remove-outline</v-icon> 취소신청
+                                   </v-btn>
                 </v-card-title>
                 <v-col>
                 <v-data-table
@@ -160,7 +167,9 @@
                                     item-key="id"
                                     show-select
                                     hide-default-footer
-                                    class="elevation-1"
+                                    class="elevation-2 overflow-y-auto"                                
+                                    fixed-header
+                                    height="200px"
                                   >
                 </v-data-table>
                 </v-col>
@@ -172,21 +181,59 @@
                       rows="2"
                     ></v-textarea>
                 </v-col>
-                <v-card-actions>
-                  <v-col class="text-right">
-                    <v-btn
-                                     color="black darken-1"
-                                     text
-                                     @click="testAxios"
-                                   >
-                                     <v-icon>mdi-calendar-remove-outline</v-icon> 취소신청
-                                   </v-btn>
-                  </v-col>
-              </v-card-actions>
             </v-card>
     </v-col>
+  </v-row>
+  </v-container>
+  <!-- 하단 휴가 신청 내역 데이터 그리드 영역 -->
+  <v-container height="60%">
+  <v-card>
+                  <v-card-title>
+                    휴가 신청 내역
+                    <v-spacer></v-spacer>
+                   </v-card-title>
+    <v-row>
+        <v-col cols="3">
+            <date-picker paramLabel="시작일" :paramDate="(new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10)"></date-picker>
+        </v-col>
+        <v-col cols="3">
+            <date-picker paramLabel="종료일"></date-picker>
+        </v-col>
+        <v-col cols="3">
+            <v-select
+              :items="['오전 반차', '오후 반차', '연차']"
+              label="*휴가 구분"
+              required
+            ></v-select>
 
-    <!-- 일정 확인 캘린더 영역 -->
+        </v-col>
+        <v-col cols="3" class="text-right">
+            <v-btn
+                color="#1f202d"
+                class="ma-4 white--text"
+                >
+                검 색
+            </v-btn>
+        </v-col>
+    </v-row>
+
+    <v-row>
+        <v-col>
+            <v-data-table
+                v-model="selectedCancelPtos"
+                :headers="cancelHeaders"
+                :items="ptoLists"
+                item-key="id"
+                show-select
+                class="elevation-1"
+              >
+            </v-data-table>
+        </v-col>
+    </v-row>
+    </v-card>
+  </v-container>
+
+  <!-- 일정 확인 캘린더 영역 -->
     <v-dialog
         transition="dialog-top-transition"
         v-model="calendarDialog"
@@ -334,57 +381,6 @@
                 </v-col>
     </v-card>
     </v-dialog>
-  </v-row>
-  </v-container>
-
-  <!-- 하단 휴가 신청 내역 데이터 그리드 영역 -->
-  <v-container height="60%">
-  <v-card>
-                  <v-card-title>
-                    휴가 신청 내역
-                    <v-spacer></v-spacer>
-                   </v-card-title>
-    <v-row>
-        <v-col cols="3">
-            <date-picker paramLabel="시작일" :paramDate="(new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10)"></date-picker>
-        </v-col>
-        <v-col cols="3">
-            <date-picker paramLabel="종료일"></date-picker>
-        </v-col>
-        <v-col cols="3">
-            <v-select
-              :items="['오전 반차', '오후 반차', '연차']"
-              label="*휴가 구분"
-              required
-            ></v-select>
-
-        </v-col>
-        <v-col cols="3" class="text-right">
-            <v-btn
-                color="#999999"
-                class="ma-2 white--text"
-                >
-                검 색
-            </v-btn>
-        </v-col>
-    </v-row>
-
-    <v-row>
-        <v-col>
-
-            <v-data-table
-                v-model="selectedCancelPtos"
-                :headers="cancelHeaders"
-                :items="ptoLists"
-                item-key="id"
-                show-select
-                class="elevation-1"
-              >
-            </v-data-table>
-        </v-col>
-    </v-row>
-    </v-card>
-  </v-container>
 </div>
 </template>
 
@@ -456,12 +452,44 @@ export default {
             days: 0.5,
             ptoType: '오전 반차'
           },
+          {
+            id: 3,
+            start: '2021-06-01',
+            end: '2021-06-03',
+            days: 3,
+            ptoType: '연차'
+          },
+          {
+            id: 4,
+            start: '2021-06-11',
+            end: '2021-06-11',
+            days: 0.5,
+            ptoType: '오전 반차'
+          },
+          {
+            id: 5,
+            start: '2021-06-01',
+            end: '2021-06-03',
+            days: 3,
+            ptoType: '연차'
+          },
+          {
+            id: 6,
+            start: '2021-06-11',
+            end: '2021-06-11',
+            days: 0.5,
+            ptoType: '오전 반차'
+          },
         ],
       }),
       mounted () {
+        this.loadData()
         if(this.$refs.calendar) this.$refs.calendar.checkChange()
       },
       methods: {
+        loadData () {
+          this.getUserInfo()
+        },
         viewDay ({ date }) {
           this.focus = date
           this.type = 'day'
@@ -524,10 +552,32 @@ export default {
         rnd (a, b) {
           return Math.floor((b - a + 1) * Math.random()) + a
         },
-        testAxios() {
-            console.log(this.axios)
-            this.axios.get('https://jsonplaceholder.typicode.com/todos/1').then((response) => {
+        testAxios() {            
+            let userId = process.env.VUE_APP_TEST_USER_ID;
+            let apiUrl = this.$apiUrls.GET_PTO_INFO.replace('{id}',userId)
+            this.axios.get(apiUrl).then((response) => {
               console.log(response.data)
+            })
+        },
+        async getUserInfo () {
+            let userId = process.env.VUE_APP_TEST_USER_ID;
+            let apiUrl = this.$apiUrls.GET_PTO_INFO.replace('{id}',userId)
+            await this.axios.get(apiUrl).then((response) => {
+              console.log(response.data)
+              /*user: {
+                  name: '홍길동',
+                  compNo: 'K0001',
+                  deptName: '인트라플랫폼팀',
+                  role: '팀원',
+                  joinDate: '2020.01.01',
+                  pto: {
+                      days: '3',
+                      type: '연차',
+                      all: 15,
+                      used: 3,
+                      unused: 12
+                  }
+              },*/
             })
         }
       },

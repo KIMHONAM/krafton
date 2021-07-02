@@ -2,7 +2,7 @@ package com.krafton.intra.employee.dto;
 
 import lombok.Data;
 
-public class EmployeeRequest {
+public class EmployeeResponse {
 
     @Data
     public static class EmployeeDto{
@@ -13,7 +13,6 @@ public class EmployeeRequest {
         private String name;
         private String position;
         private String hireDate;
-
     }
 
 }

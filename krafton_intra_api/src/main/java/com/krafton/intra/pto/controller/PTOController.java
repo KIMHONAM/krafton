@@ -1,5 +1,6 @@
 package com.krafton.intra.pto.controller;
 
+import com.krafton.intra.core.dto.ApiRequest;
 import com.krafton.intra.core.dto.ApiResponse;
 import com.krafton.intra.pto.service.PTOService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +15,52 @@ public class PTOController {
     @Autowired
     PTOService ptoService;
 
-    @GetMapping("/id/{id}")
-    public ResponseEntity<Object> getUserPtoInformation(@PathVariable int id) {
+    // 휴가 기본 정보 조회
+    @GetMapping("/info/id/{id}")
+    public ResponseEntity<Object> getUserPTOInformation(@PathVariable int id) {
+        Object obj = ptoService.getEmployeePTOInfo(id);
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(obj).build());
+    }
+
+    // 휴가 신청
+    @PostMapping("/id/{id}")
+    public ResponseEntity<Object> applicatePTO(@PathVariable int id, @RequestBody ApiRequest ptoRequest) {
 
         return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
     }
 
-    @GetMapping("/error/test")
-    public String testException() throws Exception {
-          if(1==1)  throw new Exception("111");
-        return "";
+    // 휴가 일정 조회
+    @GetMapping("/calendar/id/{id}")
+    public ResponseEntity<Object> getPTOSchedule(@PathVariable int id) {
+
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+    }
+
+    // 휴가 취소 가능 리스트 조회
+    @GetMapping("/cancel/id/{id}")
+    public ResponseEntity<Object> getCancellablePTOs(@PathVariable int id) {
+
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+    }
+
+    // 휴가 취소
+    @PostMapping("/cancel/id/{id}")
+    public ResponseEntity<Object> cancelPTOs(@PathVariable int id) {
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).build());
+    }
+
+    // 휴가 신청 리스트 조회
+    @GetMapping("/list/id/{id}")
+    public ResponseEntity<Object> getUserPTOList(@PathVariable int id) {
+
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).data(ptoService.getEmployeePTOInfo(id)).build());
+    }
+
+    // 휴가 구분 조회
+    @GetMapping("/types")
+    public ResponseEntity<Object> getPsTOTypes() {
+
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).build());
     }
 
     // 휴가 취소 리스트 조회 - get

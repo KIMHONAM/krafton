@@ -46,9 +46,9 @@ CREATE UNIQUE INDEX EMPLOYEE_UNIQUE_IDX ON employee (employee_number);
 CREATE TABLE IF NOT EXISTS employee_pto_summary (
 
 	employee_id INT(10) NOT NULL COMMENT '휴가자',
-	occur_pto FLOAT(4) NOT NULL COMMENT '발생연차',
-	use_pto FLOAT(4) NOT NULL COMMENT '사용연차',
-	unused_pto FLOAT(4) NOT NULL COMMENT '잔여연차',
+	occur_days FLOAT(4) NOT NULL COMMENT '발생연차',
+	use_days FLOAT(4) NOT NULL COMMENT '사용연차',
+	unused_days FLOAT(4) NOT NULL COMMENT '잔여연차',
 	create_date DATETIME NOT NULL DEFAULT NOW() COMMENT '데이터생성일',
     create_user INT(10) NOT NULL COMMENT '생성자',
     update_date DATETIME NULL COMMENT '수정일',
@@ -65,11 +65,12 @@ CREATE TABLE IF NOT EXISTS employee_pto_history (
 	end_date DATETIME NOT NULL COMMENT '종료일',
 	reason VARCHAR(200) NULL COMMENT '휴가 사유',
 	status VARCHAR(10) NOT NULL COMMENT '상태 - 승인/취소',
+	cancel_yn VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '취소여부',
 	pto_type VARCHAR(10) NOT NULL COMMENT '반차/연차',
 	pto_days FLOAT(4) NOT NULL COMMENT '신청 일수',
+	deduct_yn varchar(1) NOT NULL DEFAULT 'Y' COMMENT '공제 여부',
 	applicate_date DATETIME NOT NULL COMMENT '신청일',
 	applicant INT(10) NOT NULL COMMENT '신청자',
-	candidate INT(10) NOT NULL COMMENT '대상자',
 	approver INT(10) NULL COMMENT '최종 승인자',
 	approve_date DATETIME NULL COMMENT '승인일자',
 	reject_date DATETIME NULL COMMENT '반려일자',
@@ -86,6 +87,22 @@ CREATE TABLE IF NOT EXISTS employee_pto_history (
 	PRIMARY KEY (id)
 ) AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='휴가 신청 내역 테이블';
 
+CREATE TABLE IF NOT EXISTS employee_pto_items (
+
+	employee_id INT(10) UNSIGNED NOT NULL COMMENT '휴가자 아이디',
+	pto_history_id INT(10) UNSIGNED NOT NULL comment '신청내역 아이디',
+	pto_date DATE NOT NULL COMMENT '휴가일',
+	pto_start_time TIME NOT NULL COMMENT '휴가 시작 시간',
+	pto_end_time TIME NOT NULL COMMENT '휴가 종료 시간',
+	pto_type VARCHAR(10) NOT NULL COMMENT '오전,오후반차/연차',
+	create_date DATETIME NOT NULL DEFAULT NOW() COMMENT '데이터생성일',
+	create_user INT(10) NOT NULL COMMENT '생성자',
+	update_date DATETIME NULL COMMENT '수정일',
+	update_user INT(10) NULL COMMENT '수정자',
+
+	PRIMARY KEY (employee_id, pto_date, pto_type)
+) DEFAULT CHARSET=utf8 COMMENT='휴가 신청 개별 내역 테이블';
+
 CREATE TABLE IF NOT EXISTS common_code(
 
 	code VARCHAR(10) NOT NULL COMMENT '코드',
@@ -98,3 +115,10 @@ CREATE TABLE IF NOT EXISTS common_code(
 
 	PRIMARY KEY(code)
 )DEFAULT CHARSET=utf8 COMMENT='공통코드 테이블';
+
+
+CREATE TABLE IF NOT EXISTS holiday_info(
+    holiday DATE NOT NULL COMMENT '휴무일',
+    holiday_detail VARCHAR(50) NOT NULL COMMENT '휴무일 설명',
+    PRIMARY KEY(holiday)
+)DEFAULT CHARSET=utf8 COMMENT='공휴일 정보';
