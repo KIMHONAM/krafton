@@ -8,7 +8,7 @@ public class PTOSqlProvider implements ProviderMethodResolver {
 
     public String getUserPtoInfoById(final int id) {
         return new SQL(){{
-            SELECT("a.id, a.department_code, a.hire_date, a.name, a.employee_number");
+            SELECT("a.id, a.department_code, TO_CHAR(a.hire_date, 'yyyy-mm-dd') as hire_date, a.name, a.employee_number");
             SELECT("b.department_name, c.role_name as position");
             SELECT("d.occur_days, d.use_days, d.unused_days");
             FROM("employee a");
