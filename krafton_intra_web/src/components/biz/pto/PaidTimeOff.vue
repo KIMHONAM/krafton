@@ -212,12 +212,12 @@
             <date-picker paramLabel="시작일" :paramDate="(new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10)" @updateDate="(d) => (searchStartDate = d)" ></date-picker>
         </v-col>
         <v-col cols="3">
-            <date-picker paramLabel="종료일" @updateDate="(d) => (searchEndDate = d)"></date-picker>
+            <date-picker paramLabel="종료일" :paramDate="this.$moment(new Date()).add(1, 'M').format('YYYY-MM-DD')" @updateDate="(d) => (searchEndDate = d)"></date-picker>
         </v-col>
         <v-col cols="3">
             <v-select
-                  v-model="searchPtoType"
-                  :items="ptoTypes"
+                  v-model="defaultPtoHistSelect"
+                  :items="searchPtoType"
                   label="*휴가 구분"
                   item-text="name"
                   item-value="value"
@@ -229,6 +229,7 @@
             <v-btn
                 color="#1f202d"
                 class="ma-4 white--text"
+                @click="getPTOHistories"
                 >
                 검 색
             </v-btn>
@@ -238,12 +239,21 @@
     <v-row>
         <v-col>
             <v-data-table
-                :headers="cancelHeaders"
-                :items="ptoLists"
-                item-key="id"
+                :headers="totalPtoHeaders"
+                :items="ptoHistList"            
+                :footer-props="footerProps" 
+                :loading="loading"
+                :server-items-length="ptoHistLenth"
+                :options.sync="ptoHistOptions"
+                v-model="ptoHistList"
                 class="elevation-1"
                 height="300px"
               >
+              <template v-slot:no-data>
+                  <v-alert :value="true" icon="info">
+                    휴가 신청 내역이 없습니다.
+                  </v-alert>
+                </template>
             </v-data-table>
         </v-col>
     </v-row>
@@ -447,7 +457,6 @@ export default {
         selectedPtoType: '',
         selectedSearchPtoType: '',
         applicatePtoType: '',
-        searchPtoType: '',
         endApplication: false,
         endCancelRequest: false,
 
@@ -482,8 +491,63 @@ export default {
           { text: '휴가구분', value: 'ptoType' },
         ],
         ptoLists: [],
+
+        // 휴가 신청 내역
+        defaultPtoHistSelect: {
+          name: "휴가 구분",
+          value: ""
+        },
+        searchPtoType:[{name:"전체",value:""}],
+        loading: true,
+        countPost: 0,
+        ptoHistPage: 0,
+        ptoHistOptions: {},
+        ptoHistLenth: 0,
+        footerProps: { 'items-per-page-options': [2, 5] },
+        totalPtoHeaders: [
+          {
+            text: '',
+            align: 'start',
+            sortable: false,
+          },
+          { text: '상태', value: 'status' },
+          { text: '시작일', value: 'startDate' },
+          { text: '종료일', value: 'endDate' },
+          { text: '일수', value: 'ptoDays' },
+          { text: '휴가구분', value: 'ptoType' },
+          { text: '휴가사유', value: 'reason' },
+          { text: '취소여부', value: 'cancelYn' },
+          { text: '취소일자', value: 'cancelDate' },
+          { text: '취소사유', value: 'cancelReason' },
+        ],
+        ptoHistList: [],
       }),
+      watch: {
+        ptoHistOptions: {
+          handler () {
+            this.getPTOHistories()
+          },
+          deep: true
+        },
+        searchStartDate: function (newVal, oldVal) {
+          if(newVal!==oldVal){
+            this.ptoHistOptions.page = 1  
+          }
+        },
+        searchEndDate: function (newVal, oldVal) {
+          if(newVal!==oldVal){
+            this.ptoHistOptions.page = 1  
+          }
+        },
+        selectedPtoType: function (newVal, oldVal) {
+          if(newVal!==oldVal){
+            this.ptoHistOptions.page = 1  
+          }
+        }
+      },
       mounted () {
+        this.searchEndDate = this.$moment(new Date()).add(1, 'M').format('YYYY-MM-DD');
+        this.searchStartDate = (new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10),
         this.loadData()
         if(this.$refs.calendar) this.$refs.calendar.checkChange()
       },
@@ -492,6 +556,7 @@ export default {
           this.getUserInfo()
           this.getPTOType ()
           this.getCancellablePTOs()
+          this.getPTOHistories()
         },
         checkApplicateDates(dates){
           this.applicateDates = dates.sort();
@@ -644,8 +709,10 @@ export default {
               
               if(data.isSuccess){
                  this.ptoTypes = [];
+                 this.searchPtoType = [{name:"전체",value:''}]
                  data.payload.forEach(element => {
                   this.ptoTypes.push({name:element.codeName, value:element.code})   
+                  this.searchPtoType.push({name:element.codeName, value:element.code})   
                  });
 
               }else{
@@ -678,7 +745,8 @@ export default {
               
               if(data.isSuccess){
                 this.getUserInfo()
-                this.getCancellablePTOs ()
+                this.getCancellablePTOs()
+                this.getPTOHistories()
                 alert('휴가 신청이 완료되었습니다.')
               }else{
                 alert(data.errorMessage);
@@ -760,6 +828,7 @@ export default {
                 this.cancelReason = ''
                 this.getUserInfo()
                 this.getCancellablePTOs ()
+                this.getPTOHistories()
                 alert('휴가 취소가 완료되었습니다.')
               }else{
                 alert(data.errorMessage);
@@ -772,6 +841,67 @@ export default {
             }).finally(() => {
               this.selectedCancelPtos = '';
             })
+        },
+        async getPTOHistories(){
+          this.loading = true
+          await this.getPTOHistoriesAPI(this.ptoHistOptions)
+          this.loading = false
+        },
+        async getPTOHistoriesAPI () {  // 휴가 신청 내역 조회 
+            const { sortBy, sortDesc, page, itemsPerPage} = this.ptoHistOptions
+            this.countPost = itemsPerPage
+            console.log('page : '+page+', sortBy, sortDesc'+sortBy+', '+sortDesc);
+            console.log(this.defaultPtoHistSelect)
+            let userId = process.env.VUE_APP_TEST_USER_ID;
+            let apiUrl = this.$apiUrls.POST_PTO_HISTORIES.replace('{id}',userId);
+            let data = {
+              payload: {
+                fromDate: this.searchStartDate,
+                toDate: this.searchEndDate,
+                ptoType: this.defaultPtoHistSelect.value,
+                employeeId: userId,
+              },
+              limit: itemsPerPage,
+              page: page,
+            }
+
+            // let items = []            
+            // let itemCount = 0
+
+            await this.axios.post(apiUrl, data).then((response) => {
+              
+              let data = response.data
+              this.ptoHistList = data.payload.list
+              console.log('ptoHistList~~~~')
+              console.log(this.ptoHistList)
+              console.log('====================')
+              this.countPost = data.payload.totalItems
+              this.ptoHistLenth = data.payload.totalItems
+              
+            }).catch(function (error) {
+              console.error(error)
+              alert('서비스가 정상적으로 처리되지 않았습니다.')
+            }).finally(() => {
+              this.loading = false;
+            })
+
+            if (sortBy.length === 1 && sortDesc.length === 1) {
+              this.ptoHistList = this.ptoHistList.sort((a, b) => {
+                const sortA = a[sortBy[0]]
+                const sortB = b[sortBy[0]]
+
+                if (sortDesc[0]) {
+                  if (sortA < sortB) return 1
+                  if (sortA > sortB) return -1
+                  return 0
+                } else {
+                  if (sortA < sortB) return -1
+                  if (sortA > sortB) return 1
+                  return 0
+                }
+              })
+            }
+
         },
       },  // end of methods
 
