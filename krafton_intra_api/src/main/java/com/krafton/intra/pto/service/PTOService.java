@@ -10,5 +10,6 @@ public interface PTOService {
     int applicatePTO(PTORequest.PaidTimeOffDto pto);
     PTOResponse.PaidTimeOffCalenderDto getPTOSchedule(int id);
     int getCancellablePTOs(int id);
+    Object getPtoType();
 
 }

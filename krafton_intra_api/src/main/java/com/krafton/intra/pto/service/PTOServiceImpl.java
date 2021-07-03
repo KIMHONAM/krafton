@@ -45,4 +45,9 @@ public class PTOServiceImpl implements PTOService{
     public Object getEmployeePTOInfo(int id) {
         return ptoDao.select(id);
     }
+
+    @Override
+    public Object getPtoType() {
+        return ptoDao.selectPtoType();
+    }
 }
