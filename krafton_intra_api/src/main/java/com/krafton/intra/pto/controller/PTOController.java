@@ -2,6 +2,7 @@ package com.krafton.intra.pto.controller;
 
 import com.krafton.intra.core.dto.ApiRequest;
 import com.krafton.intra.core.dto.ApiResponse;
+import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.service.PTOService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,10 @@ public class PTOController {
     }
 
     // 휴가 신청
-    @PostMapping("/id/{id}")
-    public ResponseEntity<Object> applicatePTO(@PathVariable int id, @RequestBody ApiRequest ptoRequest) {
-
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
+    @PostMapping("")
+    public ResponseEntity<Object> applicatePTO(@RequestBody PTORequest.PaidTimeOffDto ptoRequest) throws InterruptedException {
+        int result = ptoService.applicatePTO(ptoRequest);
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).build());
     }
 
     // 휴가 일정 조회
