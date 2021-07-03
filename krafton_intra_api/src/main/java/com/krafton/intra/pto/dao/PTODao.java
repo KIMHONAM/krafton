@@ -1,9 +1,18 @@
 package com.krafton.intra.pto.dao;
 
 import com.krafton.intra.employee.dto.EmployeeResponse;
+import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
 
+import java.util.List;
+import java.util.Map;
+
 public interface PTODao {
-    public Object select(int id);
+    public PTOResponse.EmployeePTODto select(int id);
     public Object selectPtoType();
+    public Map<String,Object> selectHolidayMap();
+    int insertPTOHistory(PTORequest.PaidTimeOffDto pto);
+    int checkPTOExists(int employeeId, String fromDate, String toDate, String ptoType);
+    int insertPTOItems(Map<String,Object> ptoItems);
+    int mergePTOSummary(Map<String, Object> ptoSummaryMap);
 }

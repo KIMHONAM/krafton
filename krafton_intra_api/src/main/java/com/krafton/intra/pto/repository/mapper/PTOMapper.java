@@ -1,10 +1,12 @@
 package com.krafton.intra.pto.repository.mapper;
 
 import com.krafton.intra.employee.dto.EmployeeResponse;
+import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface PTOMapper {
@@ -24,5 +26,19 @@ public interface PTOMapper {
     @SelectProvider(type= PTOSqlProvider.class, method = "getCommonCode")
     List<PTOResponse.PaidTimeOffTypeDto> getCommonCode(String type);
 
+    @SelectProvider(type=PTOSqlProvider.class, method = "getHolidayMap")
+    List<Map<String, Object>> getHolidayMap();
+
+    @SelectProvider(type=PTOSqlProvider.class, method = "checkPTOExists")
+    int checkPTOExists();
+
+    @InsertProvider(type=PTOSqlProvider.class, method = "insertPTOHistory")
+    int insertPTOHistory(PTORequest.PaidTimeOffDto pto);
+
+    @InsertProvider(type = PTOSqlProvider.class, method = "insertPTOItems")
+    int insertPTOItems();
+
+    @Insert("INSERT INTO employee_pto_summary (employee_id,occur_days,use_days,unused_days,create_user) VALUES (#{employeeId},#{occurDays},#{useDays},#{unusedDays},#{employeeId}) ON DUPLICATE KEY UPDATE occur_days = #{occurDays}, use_days = #{useDays}, unused_days = #{unusedDays}, update_date = now(), update_user = #{employeeId}")
+    int mergePTOSummary();
 
 }
