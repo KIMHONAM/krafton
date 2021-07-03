@@ -60,7 +60,7 @@ public class PTOController {
     @GetMapping("/types")
     public ResponseEntity<Object> getPsTOTypes() {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getPtoType()).build());
     }
 
     // 휴가 취소 리스트 조회 - get
