@@ -73,6 +73,11 @@ public class PTODaoImpl implements PTODao{
         paramMap.put("toDate",toDate);
         paramMap.put("ptoType",ptoType);
         paramMap.put("employeeId",employeeId);
+
+        if(!commonCode.getString("pto.alldays.type").equalsIgnoreCase(ptoType)){
+            paramMap.put("allDayPtoType",commonCode.getString("pto.alldays.type"));
+        }
+
         return this.sqlSession.selectOne("checkPTOExists", paramMap);
     }
 }

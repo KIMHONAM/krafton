@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.ibatis.builder.annotation.ProviderMethodResolver;
 import org.apache.ibatis.jdbc.SQL;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -41,12 +42,16 @@ public class PTOSqlProvider implements ProviderMethodResolver {
         }}.toString();
     }
 
-    public String checkPTOExists(){
-        return new SQL(){{
-            SELECT("count(pto_date)")
-                    .FROM("employee_pto_items")
-                    .WHERE("employee_id = #{employeeId} and pto_date between #{fromDate} and #{toDate} and pto_type = #{ptoType}");
-        }}.toString();
+    public String checkPTOExists(Map<String,Object> paramMap){
+        SQL sql = new SQL()
+                .SELECT("count(pto_date)")
+                .FROM("employee_pto_items");
+        if(paramMap.get("allDayPtoType") != null){
+            sql.WHERE("employee_id = #{employeeId} and pto_date between #{fromDate} and #{toDate} and (pto_type = #{ptoType} or pto_type = #{allDayPtoType})");
+        }else{
+            sql.WHERE("employee_id = #{employeeId} and pto_date between #{fromDate} and #{toDate}");
+        }
+        return sql.toString();
     }
 
     public String insertPTOHistory(PTORequest.PaidTimeOffDto pto){  // 휴가 이력 저장

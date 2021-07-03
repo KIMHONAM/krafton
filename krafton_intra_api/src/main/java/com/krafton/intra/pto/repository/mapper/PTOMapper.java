@@ -30,7 +30,7 @@ public interface PTOMapper {
     List<Map<String, Object>> getHolidayMap();
 
     @SelectProvider(type=PTOSqlProvider.class, method = "checkPTOExists")
-    int checkPTOExists();
+    int checkPTOExists(Map<String,Object> paramMap);
 
     @InsertProvider(type=PTOSqlProvider.class, method = "insertPTOHistory")
     int insertPTOHistory(PTORequest.PaidTimeOffDto pto);
