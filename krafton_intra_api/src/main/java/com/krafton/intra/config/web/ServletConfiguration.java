@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -29,6 +30,11 @@ public class ServletConfiguration implements WebMvcConfigurer {
         resourceBundleMessageSource.setDefaultEncoding(StandardCharsets.UTF_8.displayName()); //기본 인코딩
         resourceBundleMessageSource.setBasenames("classpath:message/messages", "classpath:message/error-messages");
         return resourceBundleMessageSource;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedOrigins("*");
     }
 
 }
