@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class ApiRequest<T> {
-    private T data;
+    private T payload;
 }
