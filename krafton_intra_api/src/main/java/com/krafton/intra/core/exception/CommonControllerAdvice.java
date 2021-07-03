@@ -22,9 +22,9 @@ public class CommonControllerAdvice {
     protected MessageSourceAccessor message;
 
     @ExceptionHandler(value = BusinessException.class)
-    public ResponseEntity<ApiResponse> handleBusinessException(HttpServletRequest request, Exception e){
-        String errorCode = "";
-        String errorMessage = "";
+    public ResponseEntity<ApiResponse> handleBusinessException(HttpServletRequest request, BusinessException e){
+        String errorCode = e.getErrorCode();
+        String errorMessage = e.getErrorMessage();
         try {
             errorMessage = message.getMessage(errorCode, Locale.KOREA);
         } catch (NoSuchMessageException ee) {
