@@ -30,8 +30,6 @@ export default {
   data: () => ({
       }),
       mounted () {
-        console.log('11111111');
-        console.log(process.env);
       },
       methods: {
       },

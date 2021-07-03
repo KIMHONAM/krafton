@@ -105,7 +105,7 @@
             <v-card-title>휴가 신청 <v-btn
                          color="#999999"
                          text
-                         @click="calendarDialog = true"
+                         @click="showCalendar"
                        >
                          <v-icon>mdi-calendar-search</v-icon>일정보기
                        </v-btn>
@@ -435,8 +435,8 @@ export default {
         colors: ['deep-purple', 'grey darken-1', 'orange'],
         names: ['연차', '오후반차', '오전반차'],
         calendarDialog: false,
-
-        // 사용자 기본정보 더미
+        calendarItems: [],
+        // 사용자 기본정보 
         user: {
             name: '',
             compNo: '',
@@ -532,16 +532,19 @@ export default {
         searchStartDate: function (newVal, oldVal) {
           if(newVal!==oldVal){
             this.ptoHistOptions.page = 1  
+            this.getPTOHistories()
           }
         },
         searchEndDate: function (newVal, oldVal) {
           if(newVal!==oldVal){
             this.ptoHistOptions.page = 1  
+            this.getPTOHistories()
           }
         },
-        selectedPtoType: function (newVal, oldVal) {
+        defaultPtoHistSelect: function (newVal, oldVal) {
           if(newVal!==oldVal){
             this.ptoHistOptions.page = 1  
+            this.getPTOHistories()
           }
         }
       },
@@ -557,6 +560,12 @@ export default {
           this.getPTOType ()
           this.getCancellablePTOs()
           this.getPTOHistories()
+        },
+        showCalendar(){
+          let start = {date:this.$moment().startOf('month').format('YYYY-MM-DD')}
+          let end = {date:this.$moment().endOf('month').format('YYYY-MM-DD')}
+          this.updateRange({start,end})
+          this.calendarDialog = true
         },
         checkApplicateDates(dates){
           this.applicateDates = dates.sort();
@@ -593,26 +602,19 @@ export default {
 
           nativeEvent.stopPropagation()
         },
-        updateRange ({ start, end }) {  // 일정 이벤트 갱신
+        async updateRange ({ start, end }) {  // 일정 이벤트 갱신
           const events = []
 
-          let tempData = [{type:'tmo',end:'2021-06-03',start:'2021-06-03',details:'test',title:'홍길동 연차'},
-          {type:'tdo',end:'2021-06-04',start:'2021-06-02',details:'연차',title:'김호남 연차'},
-          {type:"tao",end:'2021-06-27',start:'2021-06-27',details:'오후반차',title:'홍길동 오후 반차'},
-          {type:"tmo",end:'2021-06-28',start:'2021-06-28',details:'오전 반차',title:'김호남 오전 반차'},]
-          const eventCount = tempData.length
-          console.log(start)
-          console.log(end)
-
-          for (let i = 0; i < eventCount; i++) {
+          await this.getCalendarInfo(start,end)
+          this.calendarItems.forEach(item => {
             events.push({
-              name: tempData[i].title,
-              start: new Date(tempData[i].start),
-              end: new Date(tempData[i].end),
-              color: tempData[i].type === 'tdo' ? this.colors[0] : (tempData[i].type === 'tao' ? this.colors[1] : this.colors[2]),
+              name: item.title,
+              start: new Date(item.start),
+              end: new Date(item.end),
+              color: item.ptoType === 'PTOT000001' ? this.colors[0] : (item.ptoType === 'PTOT000002' ? this.colors[1] : this.colors[2]),
               timed: false,
             })
-          }
+          })
 
           this.events = events
         },
@@ -620,7 +622,6 @@ export default {
           return Math.floor((b - a + 1) * Math.random()) + a
         },
         validatePTOApplication(){ // 휴가 신청
-          console.log(this.selectedPtoType)
           if(!this.selectedPtoType){
             alert('휴가 구분을 선택 해 주세요.')
             return false
@@ -647,8 +648,6 @@ export default {
             alert('반차일 경우 시작일과 종료일은 같아야합니다.')
             return false
           }
-
-          console.log('before diffDays : '+diffDays)
 
           for(let i=0;i<=diffDays;i++){ // 선택한 시작일 ~ 종료일 까지 공휴일, 주말 제외한 실제 사용일 계산
             let currentDay = this.$moment(startDate).add(i,'days');
@@ -683,6 +682,7 @@ export default {
                     name: data.payload.employee.name,
                     compNo: data.payload.employee.employeeNumber,
                     deptName: data.payload.employee.departmentName,
+                    deptCode: data.payload.employee.departmentCode,
                     role: data.payload.employee.position,
                     joinDate: data.payload.employee.hireDate,
                     pto: {
@@ -812,8 +812,7 @@ export default {
             this.selectedCancelPtos.forEach(e => {
               cancelPtoHistoryIds.push(e.id)
             })
-            console.log('this.selectedCancelPtos');
-            console.log(this.selectedCancelPtos);
+            
             let data = {
                   employeeId: userId,
                   cancelReason: this.cancelReason,
@@ -850,8 +849,7 @@ export default {
         async getPTOHistoriesAPI () {  // 휴가 신청 내역 조회 
             const { sortBy, sortDesc, page, itemsPerPage} = this.ptoHistOptions
             this.countPost = itemsPerPage
-            console.log('page : '+page+', sortBy, sortDesc'+sortBy+', '+sortDesc);
-            console.log(this.defaultPtoHistSelect)
+            
             let userId = process.env.VUE_APP_TEST_USER_ID;
             let apiUrl = this.$apiUrls.POST_PTO_HISTORIES.replace('{id}',userId);
             let data = {
@@ -865,17 +863,11 @@ export default {
               page: page,
             }
 
-            // let items = []            
-            // let itemCount = 0
-
             await this.axios.post(apiUrl, data).then((response) => {
               
               let data = response.data
-              this.ptoHistList = data.payload.list
-              console.log('ptoHistList~~~~')
-              console.log(this.ptoHistList)
-              console.log('====================')
               this.countPost = data.payload.totalItems
+              this.ptoHistList = data.payload.list
               this.ptoHistLenth = data.payload.totalItems
               
             }).catch(function (error) {
@@ -902,6 +894,23 @@ export default {
               })
             }
 
+        },
+        async getCalendarInfo (start, end) {  // 달력 일정 조회 - 같은 부서 포함
+            let apiUrl = this.$apiUrls.GET_CALENDAR_INFO.replace('{deptCode}',this.user.deptCode).replace('{start}',start.date).replace('{end}',end.date)
+            
+            await this.axios.get(apiUrl).then((response) => {
+              let data = response.data;
+              
+              if(data.isSuccess){
+                this.calendarItems = []
+                this.calendarItems = data.payload 
+              }else{
+                alert(data.errorMessage);
+              }
+            }).catch(function (error) {
+              console.error(error)
+              alert('서비스가 정상적으로 처리되지 않았습니다.')
+            })
         },
       },  // end of methods
 
