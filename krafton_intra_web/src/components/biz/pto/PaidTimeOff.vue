@@ -757,9 +757,10 @@ export default {
               let data = response.data;
               
               if(data.isSuccess){
+                this.cancelReason = ''
                 this.getUserInfo()
                 this.getCancellablePTOs ()
-                alert('휴가 신청이 완료되었습니다.')
+                alert('휴가 취소가 완료되었습니다.')
               }else{
                 alert(data.errorMessage);
               }
