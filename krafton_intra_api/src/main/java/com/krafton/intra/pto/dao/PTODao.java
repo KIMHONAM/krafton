@@ -1,5 +1,6 @@
 package com.krafton.intra.pto.dao;
 
+import com.krafton.intra.core.dto.PagingDto;
 import com.krafton.intra.employee.dto.EmployeeResponse;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
@@ -21,4 +22,7 @@ public interface PTODao {
     int rollbackPTOSummary(PTORequest.CancelPaidTimeOffDto cancelPto);
     float getSumUsePTOForRollback(PTORequest.CancelPaidTimeOffDto cancelPto);
     int deletePTOItems(PTORequest.CancelPaidTimeOffDto cancelPto);
+
+    int countPTOHistories(PTORequest.PaidTimeOffHistoryDto historyDto);
+    List<Object> selectPTOHistories(PagingDto<Object> pagingDto);
 }

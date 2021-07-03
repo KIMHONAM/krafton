@@ -37,4 +37,12 @@ public class PTORequest {
         private float rollbackDays;
     }
 
+    @Data
+    public static class PaidTimeOffHistoryDto{
+        private String fromDate;
+        private String toDate;
+        private String ptoType;
+        private int employeeId;
+    }
+
 }

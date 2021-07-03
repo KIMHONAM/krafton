@@ -45,4 +45,16 @@ public class PTOResponse {
         private String codeName; // 휴가 이름
     }
 
+    @Data
+    public static class PaidTimeOffHistoryDto{
+        private String status;
+        private String startDate;
+        private String endDate;
+        private float ptoDays;
+        private String reason;
+        private String ptoType;
+        private String cancelDate;
+        private String cancelReason;
+        private String cancelYn;
+    }
 }

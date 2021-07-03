@@ -1,8 +1,12 @@
 package com.krafton.intra.pto.controller;
 
 import com.krafton.intra.core.dto.ApiResponse;
+import com.krafton.intra.core.dto.PagingRequest;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.service.PTOService;
+import com.krafton.intra.pto.service.PTOServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RequestMapping("/pto")
 public class PTOController {
+
+    private static final Logger LOGGER = LogManager.getLogger(PTOController.class);
 
     @Autowired
     PTOService ptoService;
@@ -52,10 +58,10 @@ public class PTOController {
     }
 
     // 휴가 신청 리스트 조회
-    @GetMapping("/list/id/{id}")
-    public ResponseEntity<Object> getUserPTOList(@PathVariable int id) {
-
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
+    @PostMapping("/list/id/{id}")
+    public ResponseEntity<Object> getUserPTOList(@PathVariable int id,
+                                                 @RequestBody PagingRequest<PTORequest.PaidTimeOffHistoryDto> pagingRequest) {
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getPTOHistory(pagingRequest)).build());
     }
 
     // 휴가 구분 조회

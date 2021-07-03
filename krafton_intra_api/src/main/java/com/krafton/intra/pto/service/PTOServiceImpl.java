@@ -1,5 +1,8 @@
 package com.krafton.intra.pto.service;
 
+import com.krafton.intra.core.dto.PagingDto;
+import com.krafton.intra.core.dto.PagingRequest;
+import com.krafton.intra.core.dto.PagingResponse;
 import com.krafton.intra.core.exception.BusinessException;
 import com.krafton.intra.pto.dao.PTODao;
 import com.krafton.intra.pto.dto.PTORequest;
@@ -27,6 +30,24 @@ import java.util.Map;
 public class PTOServiceImpl implements PTOService{
 
     private static final Logger LOGGER = LogManager.getLogger(PTOServiceImpl.class);
+
+    @Override
+    public PagingResponse getPTOHistory(PagingRequest<PTORequest.PaidTimeOffHistoryDto> pagingRequest) {
+
+        int page = pagingRequest.getPage();
+        int limit = pagingRequest.getLimit();
+        PTORequest.PaidTimeOffHistoryDto historyDto = pagingRequest.getPayload();
+
+        int totalCount = ptoDao.countPTOHistories(historyDto);
+        PagingDto<Object> pagingDto = PagingDto.builder()
+                .paramData(historyDto)
+                .limit(limit)
+                .offset(page == 1 ? 0 : ((page-1)*limit))
+                .build();
+        List<Object> histories = ptoDao.selectPTOHistories(pagingDto);
+
+        return PagingResponse.builder().list(histories).totalItems(totalCount).build();
+    }
 
     final ImmutableConfiguration commonCode;
 

@@ -1,6 +1,9 @@
 package com.krafton.intra.pto.repository.mapper;
 
+import com.krafton.intra.core.dto.PagingDto;
+import com.krafton.intra.core.dto.PagingRequest;
 import com.krafton.intra.pto.dto.PTORequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.builder.annotation.ProviderMethodResolver;
 import org.apache.ibatis.jdbc.SQL;
 
@@ -119,5 +122,36 @@ public class PTOSqlProvider implements ProviderMethodResolver {
         buffer.deleteCharAt(buffer.length() - 1);
         buffer.append(")");
         return buffer.toString();
+    }
+
+    public String countPTOHistories(PTORequest.PaidTimeOffHistoryDto historyDto){
+            SQL sql = new SQL();
+            sql.SELECT("COUNT(id)");
+            sql.FROM("employee_pto_history");
+            sql.WHERE("employee_id = #{employeeId} and start_date >= #{fromDate} and end_date <= #{toDate}");
+
+            if(StringUtils.isNotEmpty(historyDto.getPtoType())){
+                sql.WHERE("pto_type = #{ptoType}");
+            }
+            return sql.toString();
+    }
+
+    public String selectPTOHistories(PagingDto<PTORequest.PaidTimeOffHistoryDto> pagingDto){
+
+        PTORequest.PaidTimeOffHistoryDto historyDto = pagingDto.getParamData();
+
+        SQL sql = new SQL();
+        sql.SELECT("(select code_name from common_code where code = a.status) as status, TO_CHAR(a.start_date,'YYYY-MM-DD') as start_date, TO_CHAR(a.end_date,'YYYY-MM-DD') as end_date, a.pto_days");
+        sql.SELECT(" a.reason, (select code_name from common_code where code = a.pto_type) as pto_type");
+        sql.SELECT(" TO_CHAR(a.cancel_date,'YYYY-MM-DD') as cancel_date, a.cancel_reason, a.cancel_yn");
+        sql.FROM(" employee_pto_history a");
+        sql.WHERE("a.employee_id = #{paramData.employeeId} and a.start_date >= #{paramData.fromDate} and a.end_date <= #{paramData.toDate}");
+
+        if(StringUtils.isNotEmpty(historyDto.getPtoType())){
+            sql.WHERE("a.pto_type = #{paramData.ptoType}");
+        }
+        sql.ORDER_BY("a.end_date DESC, a.id DESC");
+        sql.LIMIT(pagingDto.getLimit()).OFFSET(pagingDto.getOffset());
+        return sql.toString();
     }
 }

@@ -1,5 +1,6 @@
 package com.krafton.intra.pto.repository.mapper;
 
+import com.krafton.intra.core.dto.PagingDto;
 import com.krafton.intra.employee.dto.EmployeeResponse;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
@@ -55,5 +56,11 @@ public interface PTOMapper {
 
     @DeleteProvider(type = PTOSqlProvider.class, method = "deletePTOItems")
     int deletePTOItems(PTORequest.CancelPaidTimeOffDto cancelPto);
+
+    @SelectProvider(type = PTOSqlProvider.class, method = "countPTOHistories")
+    int countPTOHistories(PTORequest.PaidTimeOffHistoryDto historyDto);
+
+    @SelectProvider(type = PTOSqlProvider.class, method = "selectPTOHistories")
+    List<PTOResponse.PaidTimeOffHistoryDto> selectPTOHistories(PagingDto pagingHistoryDto);
 
 }

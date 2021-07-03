@@ -1,5 +1,6 @@
 package com.krafton.intra.pto.dao;
 
+import com.krafton.intra.core.dto.PagingDto;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +93,11 @@ public class PTODaoImpl implements PTODao{
     }
 
     @Override
+    public int countPTOHistories(PTORequest.PaidTimeOffHistoryDto historyDto) {
+        return this.sqlSession.selectOne("countPTOHistories",historyDto);
+    }
+
+    @Override
     public int checkPTOExists(int employeeId, String fromDate, String toDate, String ptoType) {
         Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("fromDate",fromDate);
@@ -104,5 +110,10 @@ public class PTODaoImpl implements PTODao{
         }
 
         return this.sqlSession.selectOne("checkPTOExists", paramMap);
+    }
+
+    @Override
+    public List<Object> selectPTOHistories(PagingDto<Object> pagingDto) {
+        return this.sqlSession.selectList("selectPTOHistories",pagingDto);
     }
 }
