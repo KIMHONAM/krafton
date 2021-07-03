@@ -588,40 +588,40 @@ export default {
           console.log(this.selectedPtoType)
           if(!this.selectedPtoType){
             alert('휴가 구분을 선택 해 주세요.')
-            return
+            return false
           }
 
           if(this.applicateDates.length != 2){
             alert('시작, 종료일을 정확히 입력 해 주세요.')
-            return
+            return false
           }
           
           this.applicateDates.sort()
 
           if( this.applicateDates[1].substring(0,3) >= (new Date().getFullYear()+2) ){
             alert('휴가 신청은 1년 이내 기간 동안 가능합니다.')
-            return
+            return false
           }
 
           let startDate = this.applicateDates[0];
           let endDate = this.applicateDates[1];
-          let diffDays = (new Date(endDate).getTime() - new Date(startDate).getTime() ) / ( 1000*3600*24 ) + 1;
+          let diffDays = (new Date(endDate).getTime() - new Date(startDate).getTime() ) / ( 1000*3600*24 );
           let realUseDays = 0;
 
           if(this.selectedPtoType.value !== 'PTOT000001' && diffDays > 0){ // 현재 연차 아닐 경우 0.5일로 설정
             alert('반차일 경우 시작일과 종료일은 같아야합니다.')
-            return
+            return false
           }
 
           console.log('before diffDays : '+diffDays)
 
-          for(let i=0;i<diffDays;i++){ // 선택한 시작일 ~ 종료일 까지 공휴일, 주말 제외한 실제 사용일 계산
+          for(let i=0;i<=diffDays;i++){ // 선택한 시작일 ~ 종료일 까지 공휴일, 주말 제외한 실제 사용일 계산
             let currentDay = this.$moment(startDate).add(i,'days');
             realUseDays = this.$holiday.HOLIDAY_MAP.has(this.$moment(currentDay).format('YYYYMMDD')) || (currentDay.isoWeekday() == 6 || currentDay.isoWeekday() == 7) ? realUseDays : realUseDays+1;             
           }
           if(realUseDays === 0){
             alert('실제 휴가 사용일이 없습니다. 날짜를 확인 해주세요')
-            return
+            return false
           }
 
           if(this.selectedPtoType.value !== 'PTOT000001'){ // 현재 연차 아닐 경우 0.5일로 설정
@@ -629,9 +629,9 @@ export default {
           }
           if(realUseDays > this.user.pto.unusedDays){
             alert('잔여 연차 부족')
-            return
+            return false
           }          
-
+          return true
         },
         async getUserInfo () {  // 기본정보 조회
             let userId = process.env.VUE_APP_TEST_USER_ID;
@@ -643,17 +643,21 @@ export default {
               let data = response.data;
               
               if(data.isSuccess){
-
-                this.user.name = data.payload.employee.name;
-                this.user.compNo = data.payload.employee.employeeNumber;
                 
-                this.user.deptName = data.payload.employee.departmentName;
-                this.user.role = data.payload.employee.position;
-                
-                this.user.joinDate = data.payload.employee.hireDate;
-                this.user.pto.all = data.payload.occurDays;
-                this.user.pto.unusedDays = data.payload.unusedDays;
-                this.user.pto.useDays = data.payload.useDays;
+                this.user = {
+                    name: data.payload.employee.name,
+                    compNo: data.payload.employee.employeeNumber,
+                    deptName: data.payload.employee.departmentName,
+                    role: data.payload.employee.position,
+                    joinDate: data.payload.employee.hireDate,
+                    pto: {
+                        days: '',
+                        type: '',
+                        all: data.payload.occurDays,
+                        useDays: data.payload.useDays,
+                        unusedDays: data.payload.unusedDays
+                    }
+                }
 
               }else{
                 alert(data.errorMessage);
@@ -681,7 +685,12 @@ export default {
         },
         async postPTO () {  // 휴가 신청
             this.endApplication = true;
-            this.validatePTOApplication()
+            let pass = this.validatePTOApplication();
+            if(!pass){
+              this.endApplication = false
+              return
+            }
+
             let userId = process.env.VUE_APP_TEST_USER_ID;
             let apiUrl = this.$apiUrls.POST_PTO.replace('{id}',userId)
             let data = {
@@ -704,6 +713,10 @@ export default {
                 alert(data.errorMessage);
               }
               this.endApplication = false
+            }).catch(function (error) {
+              console.error(error)
+              this.endApplication = false
+              alert('서비스가 정상적으로 처리되지 않았습니다.')
             })
         },
       },
