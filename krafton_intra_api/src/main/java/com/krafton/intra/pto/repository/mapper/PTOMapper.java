@@ -63,4 +63,6 @@ public interface PTOMapper {
     @SelectProvider(type = PTOSqlProvider.class, method = "selectPTOHistories")
     List<PTOResponse.PaidTimeOffHistoryDto> selectPTOHistories(PagingDto pagingHistoryDto);
 
+    @SelectProvider(type = PTOSqlProvider.class, method = "getPTOSchedule")
+    List<PTOResponse.PaidTimeOffCalenderDto> getPTOSchedule();
 }

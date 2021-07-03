@@ -36,10 +36,12 @@ public class PTOController {
     }
 
     // 휴가 일정 조회
-    @GetMapping("/calendar/id/{id}")
-    public ResponseEntity<Object> getPTOSchedule(@PathVariable int id) {
+    @GetMapping("/calendar/department/{deptCode}/start/{start}/end/{end}")
+    public ResponseEntity<Object> getPTOSchedule(@PathVariable String deptCode,
+                                                 @PathVariable String start,
+                                                 @PathVariable String end) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getCancellablePTOs(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getPTOSchedule(deptCode, start, end)).build());
     }
 
     // 휴가 취소 가능 리스트 조회
@@ -70,16 +72,5 @@ public class PTOController {
 
         return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getPtoType()).build());
     }
-
-    // 휴가 취소 리스트 조회 - get
-    // 휴가 취소 - post
-
-    // 휴가 신청 - post
-    // 휴가 일정 보기 - get
-
-    // 휴가 신청 내역 조회
-    // 휴가 구분 조회
-
-    // paging
 
 }

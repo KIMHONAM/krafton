@@ -116,4 +116,9 @@ public class PTODaoImpl implements PTODao{
     public List<Object> selectPTOHistories(PagingDto<Object> pagingDto) {
         return this.sqlSession.selectList("selectPTOHistories",pagingDto);
     }
+
+    @Override
+    public List<PTOResponse.PaidTimeOffCalenderDto> getPTOSchedule(Map<String,String> paramMap) {
+        return this.sqlSession.selectList("getPTOSchedule",paramMap);
+    }
 }

@@ -145,8 +145,12 @@ public class PTOServiceImpl implements PTOService{
     }
 
     @Override
-    public PTOResponse.PaidTimeOffCalenderDto getPTOSchedule(int id) {
-        return null;
+    public List<PTOResponse.PaidTimeOffCalenderDto> getPTOSchedule(String deptCode, String start, String end) {
+        Map<String,String> paramMap = new HashMap<>();
+        paramMap.put("deptCode",deptCode);
+        paramMap.put("start",start);
+        paramMap.put("end",end);
+        return ptoDao.getPTOSchedule(paramMap);
     }
 
     @Override

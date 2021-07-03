@@ -11,7 +11,7 @@ public interface PTOService {
 
     Object getEmployeePTOInfo(int id);
     void applicatePTO(PTORequest.PaidTimeOffDto pto);
-    PTOResponse.PaidTimeOffCalenderDto getPTOSchedule(int id);
+    List<PTOResponse.PaidTimeOffCalenderDto> getPTOSchedule(String deptCode, String start, String end);
     List<PTOResponse.CancellablePaidTimeOffDto> getCancellablePTOs(int id);
     Object getPtoType();
     void cancelPTO(PTORequest.CancelPaidTimeOffDto cancelPto);

@@ -25,4 +25,5 @@ public interface PTODao {
 
     int countPTOHistories(PTORequest.PaidTimeOffHistoryDto historyDto);
     List<Object> selectPTOHistories(PagingDto<Object> pagingDto);
+    List<PTOResponse.PaidTimeOffCalenderDto> getPTOSchedule(Map<String,String> paramMap);
 }

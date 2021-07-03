@@ -9,9 +9,10 @@ public class PTOResponse {
     @Data
     public static class PaidTimeOffCalenderDto {
 
-        private String name;
-        private String startDate;
-        private String endDate;
+        private String start;
+        private String end;
+        private String details;
+        private String title;
         private String ptoType;
 
     }

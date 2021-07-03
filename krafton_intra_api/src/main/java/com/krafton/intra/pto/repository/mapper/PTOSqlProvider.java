@@ -154,4 +154,14 @@ public class PTOSqlProvider implements ProviderMethodResolver {
         sql.LIMIT(pagingDto.getLimit()).OFFSET(pagingDto.getOffset());
         return sql.toString();
     }
+
+    public String getPTOSchedule(){
+        return new SQL(){{
+            SELECT("a.start_date as start, a.end_date as end, b.name||' '||c.code_name as details, b.name||' '||c.code_name as title, a.pto_type ")
+                    .FROM("employee_pto_history a")
+                    .INNER_JOIN("employee b on a.employee_id = b.id ")
+                    .LEFT_OUTER_JOIN("common_code c on a.pto_type = c.code")
+                    .WHERE("b.department_code = #{deptCode} and a.start_date >= #{start} and a.end_date <= #{end}");
+        }}.toString();
+    }
 }
