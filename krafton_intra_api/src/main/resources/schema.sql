@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS employee_pto_summary (
 
 CREATE TABLE IF NOT EXISTS employee_pto_history (
 
-	id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '순번',
+	id VARCHAR(30) COMMENT '신청내역 키',
 	employee_id INT(10) UNSIGNED NOT NULL COMMENT '휴가자 아이디',
 	start_date DATETIME NOT NULL COMMENT '시작일',
 	end_date DATETIME NOT NULL COMMENT '종료일',
@@ -85,15 +85,13 @@ CREATE TABLE IF NOT EXISTS employee_pto_history (
 	update_user INT(10) NULL COMMENT '수정자',
 
 	PRIMARY KEY (id)
-) AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='휴가 신청 내역 테이블';
+) DEFAULT CHARSET=utf8 COMMENT='휴가 신청 내역 테이블';
 
 CREATE TABLE IF NOT EXISTS employee_pto_items (
 
 	employee_id INT(10) UNSIGNED NOT NULL COMMENT '휴가자 아이디',
-	pto_history_id INT(10) UNSIGNED NOT NULL comment '신청내역 아이디',
+	pto_history_id VARCHAR(30) COMMENT '신청내역 키',
 	pto_date DATE NOT NULL COMMENT '휴가일',
-	pto_start_time TIME NOT NULL COMMENT '휴가 시작 시간',
-	pto_end_time TIME NOT NULL COMMENT '휴가 종료 시간',
 	pto_type VARCHAR(10) NOT NULL COMMENT '오전,오후반차/연차',
 	create_date DATETIME NOT NULL DEFAULT NOW() COMMENT '데이터생성일',
 	create_user INT(10) NOT NULL COMMENT '생성자',
