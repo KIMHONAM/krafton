@@ -113,7 +113,8 @@
             <v-btn
                                      color="#1f202d darken-1"
                                      text
-                                     @click="dialog = false"
+                                     @click="postPTO"
+                                     :disabled="endApplication"
                                    >
                                      <v-icon>mdi-calendar-import</v-icon> 휴가 신청
                                    </v-btn>            
@@ -128,7 +129,7 @@
                     sm="6"
                     md="6">
                 <v-select
-                  v-model="applicatePtoType"
+                  v-model="selectedPtoType"
                   :items="ptoTypes"
                   label="*휴가 구분"
                   item-text="name"
@@ -140,7 +141,7 @@
               
               <v-col cols="12">
               <v-textarea
-                        v-model="ptoApplication.applicateReason"
+                        v-model="applicateReason"
                         label="휴가 사유"
                         value="개인 사유"
                         hint="간략한 휴가 사유를 작성해주세요."
@@ -433,16 +434,21 @@ export default {
 
         // 휴가 구분
         ptoTypes: [],
+        selectedPtoType: '',
+        selectedSearchPtoType: '',
         applicatePtoType: '',
         searchPtoType: '',
+        endApplication: false,
 
         // 휴가 신청
+        applicateDays: '',
+        applicateReason: '',
         applicateDates:[],
         ptoApplication: {
           employeeId: '',
           startDate: '',
           endDate: '',
-          applicateReason: '',
+          reason: '',
           ptoType: ''
           // 추후 결재 정보 추가 될 수 있음.
         },
@@ -518,9 +524,7 @@ export default {
           this.getPTOType ()
         },
         checkApplicateDates(dates){
-          console.log('1111111')
-          console.log(dates)
-          console.log('2222222')
+          this.applicateDates = dates.sort();
         },
         viewDay ({ date }) {
           this.focus = date
@@ -560,11 +564,7 @@ export default {
           let tempData = [{type:'tmo',end:'2021-06-03',start:'2021-06-03',details:'test',title:'홍길동 연차'},
           {type:'tdo',end:'2021-06-04',start:'2021-06-02',details:'연차',title:'김호남 연차'},
           {type:"tao",end:'2021-06-27',start:'2021-06-27',details:'오후반차',title:'홍길동 오후 반차'},
-          {type:"tmo",end:'2021-06-28',start:'2021-06-28',details:'오전 반차',title:'김호남 오전 반차'},
-          {type:"tao",end:'2021-06-27',start:'2021-06-27',details:'오후반차',title:'홍길동 오후 반차'},
-          {type:"tmo",end:'2021-06-28',start:'2021-06-28',details:'오전 반차',title:'김호남 오전 반차'},
-          {type:"tdo",end:'2021-06-27',start:'2021-06-27',details:'연차',title:'홍길동 오후 반차'},
-          {type:"tdo",end:'2021-06-28',start:'2021-06-28',details:'연차',title:'김호남 오전 반차'}]
+          {type:"tmo",end:'2021-06-28',start:'2021-06-28',details:'오전 반차',title:'김호남 오전 반차'},]
           const eventCount = tempData.length
           console.log(start)
           console.log(end)
@@ -584,7 +584,56 @@ export default {
         rnd (a, b) {
           return Math.floor((b - a + 1) * Math.random()) + a
         },
-        async getUserInfo () {
+        validatePTOApplication(){ // 휴가 신청
+          console.log(this.selectedPtoType)
+          if(!this.selectedPtoType){
+            alert('휴가 구분을 선택 해 주세요.')
+            return
+          }
+
+          if(this.applicateDates.length != 2){
+            alert('시작, 종료일을 정확히 입력 해 주세요.')
+            return
+          }
+          
+          this.applicateDates.sort()
+
+          if( this.applicateDates[1].substring(0,3) >= (new Date().getFullYear()+2) ){
+            alert('휴가 신청은 1년 이내 기간 동안 가능합니다.')
+            return
+          }
+
+          let startDate = this.applicateDates[0];
+          let endDate = this.applicateDates[1];
+          let diffDays = (new Date(endDate).getTime() - new Date(startDate).getTime() ) / ( 1000*3600*24 ) + 1;
+          let realUseDays = 0;
+
+          if(this.selectedPtoType.value !== 'PTOT000001' && diffDays > 0){ // 현재 연차 아닐 경우 0.5일로 설정
+            alert('반차일 경우 시작일과 종료일은 같아야합니다.')
+            return
+          }
+
+          console.log('before diffDays : '+diffDays)
+
+          for(let i=0;i<diffDays;i++){ // 선택한 시작일 ~ 종료일 까지 공휴일, 주말 제외한 실제 사용일 계산
+            let currentDay = this.$moment(startDate).add(i,'days');
+            realUseDays = this.$holiday.HOLIDAY_MAP.has(this.$moment(currentDay).format('YYYYMMDD')) || (currentDay.isoWeekday() == 6 || currentDay.isoWeekday() == 7) ? realUseDays : realUseDays+1;             
+          }
+          if(realUseDays === 0){
+            alert('실제 휴가 사용일이 없습니다. 날짜를 확인 해주세요')
+            return
+          }
+
+          if(this.selectedPtoType.value !== 'PTOT000001'){ // 현재 연차 아닐 경우 0.5일로 설정
+            realUseDays = 0.5
+          }
+          if(realUseDays > this.user.pto.unusedDays){
+            alert('잔여 연차 부족')
+            return
+          }          
+
+        },
+        async getUserInfo () {  // 기본정보 조회
             let userId = process.env.VUE_APP_TEST_USER_ID;
             let apiUrl = this.$apiUrls.GET_PTO_INFO.replace('{id}',userId)
             
@@ -611,12 +660,11 @@ export default {
               }
             })
         },
-        async getPTOType () {
+        async getPTOType () { // 휴가 구분 조회
            
             let apiUrl = this.$apiUrls.GET_PTO_TYPE
             
             await this.axios.get(apiUrl).then((response) => {
-
 
               let data = response.data;
               
@@ -630,7 +678,34 @@ export default {
                 alert(data.errorMessage);
               }
             })
-        }
+        },
+        async postPTO () {  // 휴가 신청
+            this.endApplication = true;
+            this.validatePTOApplication()
+            let userId = process.env.VUE_APP_TEST_USER_ID;
+            let apiUrl = this.$apiUrls.POST_PTO.replace('{id}',userId)
+            let data = {
+                  employeeId: userId,
+                  startDate: this.applicateDates[0],
+                  endDate: this.applicateDates[1],
+                  ptoType: this.selectedPtoType.value,
+                  reason: this.applicateReason,
+                
+            }
+
+            await this.axios.post(apiUrl, data).then((response) => {
+              
+              let data = response.data;
+              
+              if(data.isSuccess){
+                this.getUserInfo();
+                alert('휴가 신청이 완료되었습니다.')
+              }else{
+                alert(data.errorMessage);
+              }
+              this.endApplication = false
+            })
+        },
       },
 
 };
