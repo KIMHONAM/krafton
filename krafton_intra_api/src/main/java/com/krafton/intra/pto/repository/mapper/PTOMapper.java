@@ -4,11 +4,10 @@ import com.krafton.intra.employee.dto.EmployeeResponse;
 import com.krafton.intra.pto.dto.PTOResponse;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 @Mapper
 public interface PTOMapper {
-
-    @Select("select * from employee where 1 = #{id}")
-    EmployeeResponse.EmployeeDto findById(@Param("id") int id);
 
     @SelectProvider(type= PTOSqlProvider.class, method = "getUserPtoInfoById")
     @Results(value = {
@@ -21,4 +20,9 @@ public interface PTOMapper {
             @Result(property = "employee.hireDate", column = "hire_date"),
     })
     PTOResponse.EmployeePTODto getUserPtoInfoById(@Param("id") int id);
+
+    @SelectProvider(type= PTOSqlProvider.class, method = "getCommonCode")
+    List<PTOResponse.PaidTimeOffTypeDto> getCommonCode(String type);
+
+
 }

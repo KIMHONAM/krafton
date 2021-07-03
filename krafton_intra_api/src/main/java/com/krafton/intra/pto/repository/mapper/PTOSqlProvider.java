@@ -1,5 +1,7 @@
 package com.krafton.intra.pto.repository.mapper;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.ibatis.builder.annotation.ProviderMethodResolver;
 import org.apache.ibatis.jdbc.SQL;
 
@@ -16,6 +18,14 @@ public class PTOSqlProvider implements ProviderMethodResolver {
             INNER_JOIN("employee_role c on a.position_id = c.id");
             LEFT_OUTER_JOIN("employee_pto_summary d on a.id = d.employee_id");
             WHERE("a.id =  #{id}");
+        }}.toString();
+    }
+
+    public String getCommonCode(final String type){
+        return new SQL(){{
+            SELECT("code, code_name");
+            FROM("common_code");
+            WHERE("code like '"+type+"'||'%'");
         }}.toString();
     }
 
