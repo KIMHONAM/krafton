@@ -160,6 +160,8 @@
                 <v-btn
                                      color="#BC544B"
                                      text
+                                     :disabled="endCancelRequest"
+                                     @click="putCancelPTO"
                                    >
                                      <v-icon>mdi-calendar-remove-outline</v-icon> 취소신청
                                    </v-btn>
@@ -176,13 +178,19 @@
                                     fixed-header
                                     height="200px"
                                   >
+                <template v-slot:no-data>
+                  <v-alert :value="true" icon="info">
+                    취소 가능 휴가 내역이 없습니다.
+                  </v-alert>
+                </template>
                 </v-data-table>
                 </v-col>
                 <v-col>
                   <v-textarea
-                      label="취소 사유"
+                      label="*취소 사유"
                       value=""
                       placeholder="취소사유를 입력해주세요."
+                      v-model="cancelReason"
                       rows="2"
                     ></v-textarea>
                 </v-col>
@@ -192,11 +200,13 @@
   </v-container>
   <!-- 하단 휴가 신청 내역 데이터 그리드 영역 -->
   <v-container height="60%">
-  <v-card>
+  <v-card >
                   <v-card-title>
                     휴가 신청 내역
                     <v-spacer></v-spacer>
                    </v-card-title>
+    
+    <v-container>
     <v-row>
         <v-col cols="3">
             <date-picker paramLabel="시작일" :paramDate="(new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10)" @updateDate="(d) => (searchStartDate = d)" ></date-picker>
@@ -228,16 +238,16 @@
     <v-row>
         <v-col>
             <v-data-table
-                v-model="selectedCancelPtos"
                 :headers="cancelHeaders"
                 :items="ptoLists"
                 item-key="id"
-                show-select
                 class="elevation-1"
+                height="300px"
               >
             </v-data-table>
         </v-col>
     </v-row>
+    </v-container>
     </v-card>
   </v-container>
 
@@ -439,6 +449,7 @@ export default {
         applicatePtoType: '',
         searchPtoType: '',
         endApplication: false,
+        endCancelRequest: false,
 
         // 휴가 신청
         applicateDays: '',
@@ -456,8 +467,9 @@ export default {
         searchStartDate: '',
         searchEndDate: '',
 
-        // 휴가 취소 & 더미
+        // 휴가 취소
         selectedCancelPtos: [],
+        cancelReason: '',
         cancelHeaders: [
           {
             text: '',
@@ -469,50 +481,7 @@ export default {
           { text: '일수', value: 'days' },
           { text: '휴가구분', value: 'ptoType' },
         ],
-        ptoLists: [
-          {
-            id: 1,
-            start: '2021-06-01',
-            end: '2021-06-03',
-            days: 3,
-            ptoType: '연차'
-          },
-          {
-            id: 2,
-            start: '2021-06-11',
-            end: '2021-06-11',
-            days: 0.5,
-            ptoType: '오전 반차'
-          },
-          {
-            id: 3,
-            start: '2021-06-01',
-            end: '2021-06-03',
-            days: 3,
-            ptoType: '연차'
-          },
-          {
-            id: 4,
-            start: '2021-06-11',
-            end: '2021-06-11',
-            days: 0.5,
-            ptoType: '오전 반차'
-          },
-          {
-            id: 5,
-            start: '2021-06-01',
-            end: '2021-06-03',
-            days: 3,
-            ptoType: '연차'
-          },
-          {
-            id: 6,
-            start: '2021-06-11',
-            end: '2021-06-11',
-            days: 0.5,
-            ptoType: '오전 반차'
-          },
-        ],
+        ptoLists: [],
       }),
       mounted () {
         this.loadData()
@@ -522,6 +491,7 @@ export default {
         loadData () {
           this.getUserInfo()
           this.getPTOType ()
+          this.getCancellablePTOs()
         },
         checkApplicateDates(dates){
           this.applicateDates = dates.sort();
@@ -707,7 +677,8 @@ export default {
               let data = response.data;
               
               if(data.isSuccess){
-                this.getUserInfo();
+                this.getUserInfo()
+                this.getCancellablePTOs ()
                 alert('휴가 신청이 완료되었습니다.')
               }else{
                 alert(data.errorMessage);
@@ -719,7 +690,90 @@ export default {
               alert('서비스가 정상적으로 처리되지 않았습니다.')
             })
         },
-      },
+        async getCancellablePTOs () {  // 취소 가능 휴가 리스트 조회 
+            let userId = process.env.VUE_APP_TEST_USER_ID;
+            let apiUrl = this.$apiUrls.GET_CANCELLABLE_PTOS.replace('{id}',userId)
+            
+            await this.axios.get(apiUrl).then((response) => {
+              let data = response.data;
+              
+              if(data.isSuccess){
+                this.selectedCancelPtos = []
+                this.ptoLists = []
+                let cancellablePTOs = [];
+                if(data.payload){
+                  data.payload.forEach(e => 
+                    cancellablePTOs.push({
+                     
+                        id: e.ptoHistoryId,
+                        start: e.startDate,
+                        end: e.endDate,
+                        days: e.days,
+                        ptoType: e.ptoTypeName
+                       
+                    }));
+                  
+                }  
+                this.ptoLists = cancellablePTOs;
+              }else{
+                alert(data.errorMessage);
+              }
+            }).catch(function (error) {
+              console.error(error)
+              alert('서비스가 정상적으로 처리되지 않았습니다.')
+            })
+        },
+        async putCancelPTO () {  // 휴가 취소 요청
+            this.endCancelRequest = true;
+
+            let userId = process.env.VUE_APP_TEST_USER_ID;
+            let apiUrl = this.$apiUrls.PUT_CANCEL_PTO
+            
+            if(!this.selectedCancelPtos || this.selectedCancelPtos.length == 0){
+              alert('취소하실 휴가를 선택해주세요.')
+              this.endCancelRequest = false;
+              return
+            }
+            if(!this.cancelReason){
+              alert('취소 사유를 입력해주세요.')
+              this.endCancelRequest = false;
+              return;
+            }
+            let cancelPtoHistoryIds = []
+
+            this.selectedCancelPtos.forEach(e => {
+              cancelPtoHistoryIds.push(e.id)
+            })
+            console.log('this.selectedCancelPtos');
+            console.log(this.selectedCancelPtos);
+            let data = {
+                  employeeId: userId,
+                  cancelReason: this.cancelReason,
+                  ptoHistoryIds: cancelPtoHistoryIds,
+            }
+
+            await this.axios.put(apiUrl, data).then((response) => {
+              
+              let data = response.data;
+              
+              if(data.isSuccess){
+                this.getUserInfo()
+                this.getCancellablePTOs ()
+                alert('휴가 신청이 완료되었습니다.')
+              }else{
+                alert(data.errorMessage);
+              }
+              this.endCancelRequest = false
+            }).catch(function (error) {
+              console.error(error)
+              this.endCancelRequest = false
+              alert('서비스가 정상적으로 처리되지 않았습니다.')
+            }).finally(() => {
+              this.selectedCancelPtos = '';
+            })
+        },
+      },  // end of methods
+
 
 };
 </script>
