@@ -29,19 +29,13 @@ public class PTOResponse {
     @Data
     public static class CancellablePaidTimeOffDto {
 
-        private String employeeId;
+        private String ptoHistoryId;
+        private int employeeId;
         private String startDate;
         private String endDate;
         private String days;
-        private String ptoType;
+        private String ptoTypeName;
 
-    }
-
-    // 휴가 구분
-    @Data
-    public static class PaidTimeOffTypeDto{
-        private String code; // 휴가 코드
-        private String codeName; // 휴가 이름
     }
 
     // 공통코드

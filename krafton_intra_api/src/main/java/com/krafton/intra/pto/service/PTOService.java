@@ -4,12 +4,15 @@ import com.krafton.intra.employee.dto.EmployeeResponse;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
 
+import java.util.List;
+
 public interface PTOService {
 
     Object getEmployeePTOInfo(int id);
-    int applicatePTO(PTORequest.PaidTimeOffDto pto);
+    void applicatePTO(PTORequest.PaidTimeOffDto pto);
     PTOResponse.PaidTimeOffCalenderDto getPTOSchedule(int id);
-    int getCancellablePTOs(int id);
+    List<PTOResponse.CancellablePaidTimeOffDto> getCancellablePTOs(int id);
     Object getPtoType();
+    void cancelPTO(PTORequest.CancelPaidTimeOffDto cancelPto);
 
 }

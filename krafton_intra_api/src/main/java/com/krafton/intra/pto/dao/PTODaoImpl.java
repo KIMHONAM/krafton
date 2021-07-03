@@ -67,6 +67,31 @@ public class PTODaoImpl implements PTODao{
     }
 
     @Override
+    public int rollbackPTOSummary(PTORequest.CancelPaidTimeOffDto cancelPto) {
+        return this.sqlSession.update("rollbackUseDays",cancelPto);
+    }
+
+    @Override
+    public int deletePTOItems(PTORequest.CancelPaidTimeOffDto cancelPto) {
+        return this.sqlSession.delete("deletePTOItems",cancelPto);
+    }
+
+    @Override
+    public int cancelPTOHistories(PTORequest.CancelPaidTimeOffDto cancelPto) {
+        return this.sqlSession.update("cancelPTOHistories", cancelPto);
+    }
+
+    @Override
+    public float getSumUsePTOForRollback(PTORequest.CancelPaidTimeOffDto cancelPto) {
+        return this.sqlSession.selectOne("selectSumUsePtoForRollback",cancelPto);
+    }
+
+    @Override
+    public List<PTOResponse.CancellablePaidTimeOffDto> getCancellablePTOs(int id) {
+        return this.sqlSession.selectList("selectCancellablePTOs",id);
+    }
+
+    @Override
     public int checkPTOExists(int employeeId, String fromDate, String toDate, String ptoType) {
         Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("fromDate",fromDate);

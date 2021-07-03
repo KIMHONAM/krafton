@@ -24,7 +24,7 @@ public interface PTOMapper {
     PTOResponse.EmployeePTODto getUserPtoInfoById(@Param("id") int id);
 
     @SelectProvider(type= PTOSqlProvider.class, method = "getCommonCode")
-    List<PTOResponse.PaidTimeOffTypeDto> getCommonCode(String type);
+    List<PTOResponse.CommonCodeDto> getCommonCode(String type);
 
     @SelectProvider(type=PTOSqlProvider.class, method = "getHolidayMap")
     List<Map<String, Object>> getHolidayMap();
@@ -40,5 +40,20 @@ public interface PTOMapper {
 
     @Insert("INSERT INTO employee_pto_summary (employee_id,occur_days,use_days,unused_days,create_user) VALUES (#{employeeId},#{occurDays},#{useDays},#{unusedDays},#{employeeId}) ON DUPLICATE KEY UPDATE occur_days = #{occurDays}, use_days = #{useDays}, unused_days = #{unusedDays}, update_date = now(), update_user = #{employeeId}")
     int mergePTOSummary();
+
+    @SelectProvider(type = PTOSqlProvider.class, method = "selectCancellablePTOs")
+    List<PTOResponse.CancellablePaidTimeOffDto> selectCancellablePTOs();
+
+    @UpdateProvider(type = PTOSqlProvider.class, method = "cancelPTOHistories")
+    int cancelPTOHistories(PTORequest.CancelPaidTimeOffDto cancelPto);
+
+    @SelectProvider(type = PTOSqlProvider.class, method = "selectSumUsePtoForRollback")
+    float selectSumUsePtoForRollback(PTORequest.CancelPaidTimeOffDto cancelPto);
+
+    @UpdateProvider(type = PTOSqlProvider.class, method = "rollbackUseDays")
+    int rollbackUseDays();
+
+    @DeleteProvider(type = PTOSqlProvider.class, method = "deletePTOItems")
+    int deletePTOItems(PTORequest.CancelPaidTimeOffDto cancelPto);
 
 }

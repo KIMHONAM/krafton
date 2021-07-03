@@ -2,6 +2,8 @@ package com.krafton.intra.pto.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 
 public class PTORequest {
 
@@ -24,5 +26,15 @@ public class PTORequest {
 
     }
 
+    // 휴가 취소
+    @Data
+    public static class CancelPaidTimeOffDto {
+        private List<String> ptoHistoryIds;
+        private int employeeId;
+        private String cancelReason;
+        private String status;
+        private String currentHistoryId;
+        private float rollbackDays;
+    }
 
 }

@@ -15,4 +15,10 @@ public interface PTODao {
     int checkPTOExists(int employeeId, String fromDate, String toDate, String ptoType);
     int insertPTOItems(Map<String,Object> ptoItems);
     int mergePTOSummary(Map<String, Object> ptoSummaryMap);
+
+    List<PTOResponse.CancellablePaidTimeOffDto> getCancellablePTOs(int id);
+    int cancelPTOHistories(PTORequest.CancelPaidTimeOffDto cancelPto);
+    int rollbackPTOSummary(PTORequest.CancelPaidTimeOffDto cancelPto);
+    float getSumUsePTOForRollback(PTORequest.CancelPaidTimeOffDto cancelPto);
+    int deletePTOItems(PTORequest.CancelPaidTimeOffDto cancelPto);
 }

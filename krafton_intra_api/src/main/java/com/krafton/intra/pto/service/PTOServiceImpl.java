@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,12 +34,50 @@ public class PTOServiceImpl implements PTOService{
     PTODao ptoDao;
 
     /**
+     * 휴가 취소
+     * @param cancelPto
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void cancelPTO(PTORequest.CancelPaidTimeOffDto cancelPto) {
+
+        if(StringUtils.isEmpty(cancelPto.getCancelReason())){
+            throw new BusinessException("ERR100011");   // 취소사유 필수
+        }
+
+        if(cancelPto.getPtoHistoryIds() == null || cancelPto.getPtoHistoryIds().size() == 0){
+            throw new BusinessException("ERR100012");   // 취소 데이터 확인 필요
+        }
+
+        cancelPto.setStatus(commonCode.getString("pto.status.cancel"));
+        int cancelHistoriesRows = ptoDao.cancelPTOHistories(cancelPto);
+
+        if( cancelHistoriesRows != cancelPto.getPtoHistoryIds().size()){
+            throw new BusinessException("ERR100012");   // 취소 데이터 확인 필요
+        }
+
+        float sumUsedPTODaysForRollback = ptoDao.getSumUsePTOForRollback(cancelPto);
+        if( !(sumUsedPTODaysForRollback >= 0)){         // 사용 휴가일이 0보다 크지 않으면 데이터 확인 필요
+            throw new BusinessException("ERR100012");
+        }
+        cancelPto.setRollbackDays(sumUsedPTODaysForRollback);
+        int effectedSummaryRows = ptoDao.rollbackPTOSummary(cancelPto);
+
+        if(effectedSummaryRows != 1){                   //  요약 테이블 업데이트 갱신 건수 체크
+            throw new BusinessException("ERR100012");
+        }
+        int deletedPtoItems = ptoDao.deletePTOItems(cancelPto);
+
+    }
+
+    /**
      * 휴가 신청
      * @param pto
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public int applicatePTO(PTORequest.PaidTimeOffDto pto) {
+    public void applicatePTO(PTORequest.PaidTimeOffDto pto) {
 
         Map<String,Object> passedPTO = validatePTO(pto);    // 검증 통과한 insert용 데이터
 
@@ -62,7 +101,6 @@ public class PTOServiceImpl implements PTOService{
         ptoDao.insertPTOHistory(pto); // 휴가 이력 추가
         ptoDao.insertPTOItems(passedPTO);   // 휴가 개별 내역 생성
 
-
         Map<String,Object> summaryMap = new HashMap<>();
 
         summaryMap.put("employeeId", pto.getEmployeeId());
@@ -79,20 +117,10 @@ public class PTOServiceImpl implements PTOService{
         }
 
         int mergeSummaryResult = ptoDao.mergePTOSummary(summaryMap);
-        LOGGER.debug("mergeSummaryResult : "+mergeSummaryResult);
-        // 이전 날짜 휴가 신청 제한 & 2년뒤 휴가 신청 제한
+        if(mergeSummaryResult != 2){    // insert into on duplicate key --> 정상 결과 : 2
+            throw new BusinessException("ERR100010");   // 마지막 이력까지 정상 업데이트 실패 시 모두 롤백
+        }
 
-        // 해당 기간 내 휴가 겹치는 시간 있는지 체크 - employee_pto_items
-
-        // 시작일 ~ 종료일 주말, 공휴일 제외한 날짜 계산
-        // 신청 내역에 기록
-        // 개별 employee_pto_items 테이블에 기록
-        // 휴가 요약 테이블 갱신
-
-        // 이후  컨트롤러에서 기본정보, 휴가 취소 가능 내역 재조회
-        // 뷰에서 휴가 신청내역 재조회
-
-        return 0;
     }
 
     @Override
@@ -101,8 +129,8 @@ public class PTOServiceImpl implements PTOService{
     }
 
     @Override
-    public int getCancellablePTOs(int id) {
-        return 0;
+    public List<PTOResponse.CancellablePaidTimeOffDto> getCancellablePTOs(int id) {
+        return ptoDao.getCancellablePTOs(id);
     }
 
     /**

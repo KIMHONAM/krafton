@@ -1,6 +1,5 @@
 package com.krafton.intra.pto.controller;
 
-import com.krafton.intra.core.dto.ApiRequest;
 import com.krafton.intra.core.dto.ApiResponse;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.service.PTOService;
@@ -26,7 +25,7 @@ public class PTOController {
     // 휴가 신청
     @PostMapping("")
     public ResponseEntity<Object> applicatePTO(@RequestBody PTORequest.PaidTimeOffDto ptoRequest) throws InterruptedException {
-        int result = ptoService.applicatePTO(ptoRequest);
+        ptoService.applicatePTO(ptoRequest);
         return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).build());
     }
 
@@ -34,19 +33,21 @@ public class PTOController {
     @GetMapping("/calendar/id/{id}")
     public ResponseEntity<Object> getPTOSchedule(@PathVariable int id) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getCancellablePTOs(id)).build());
     }
 
     // 휴가 취소 가능 리스트 조회
     @GetMapping("/cancel/id/{id}")
     public ResponseEntity<Object> getCancellablePTOs(@PathVariable int id) {
 
-        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getEmployeePTOInfo(id)).build());
+        return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).payload(ptoService.getCancellablePTOs(id)).build());
     }
 
     // 휴가 취소
-    @PostMapping("/cancel/id/{id}")
-    public ResponseEntity<Object> cancelPTOs(@PathVariable int id) {
+    @PutMapping("")
+    public ResponseEntity<Object> cancelPTOs(@RequestBody PTORequest.CancelPaidTimeOffDto cancelPto) {
+
+        ptoService.cancelPTO(cancelPto);
         return ResponseEntity.ok(ApiResponse.builder().isSuccess(true).build());
     }
 
