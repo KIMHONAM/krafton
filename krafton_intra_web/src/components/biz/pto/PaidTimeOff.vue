@@ -122,20 +122,25 @@
             <v-container>
             <v-row>
             <v-col cols="12">
-                <date-picker :range="true" paramLabel="*연차 시작,종료일을 선택해주세요."></date-picker>
+                <date-picker :range="true" paramLabel="*연차 시작,종료일을 선택해주세요." @updateDate="checkApplicateDates"></date-picker>
               </v-col>
               <v-col cols="6"
                     sm="6"
                     md="6">
                 <v-select
-                  :items="['오전 반차', '오후 반차', '연차']"
+                  v-model="applicatePtoType"
+                  :items="ptoTypes"
                   label="*휴가 구분"
+                  item-text="name"
+                  item-value="value"
+                  return-object
                   required
                 ></v-select>
               </v-col>
               
               <v-col cols="12">
               <v-textarea
+                        v-model="ptoApplication.applicateReason"
                         label="휴가 사유"
                         value="개인 사유"
                         hint="간략한 휴가 사유를 작성해주세요."
@@ -154,7 +159,6 @@
                 <v-btn
                                      color="#BC544B"
                                      text
-                                     @click="testAxios"
                                    >
                                      <v-icon>mdi-calendar-remove-outline</v-icon> 취소신청
                                    </v-btn>
@@ -201,11 +205,14 @@
         </v-col>
         <v-col cols="3">
             <v-select
-              :items="['오전 반차', '오후 반차', '연차']"
-              label="*휴가 구분"
-              required
-            ></v-select>
-
+                  v-model="searchPtoType"
+                  :items="ptoTypes"
+                  label="*휴가 구분"
+                  item-text="name"
+                  item-value="value"
+                  return-object
+                  required
+                ></v-select>
         </v-col>
         <v-col cols="3" class="text-right">
             <v-btn
@@ -424,6 +431,25 @@ export default {
             }
         },
 
+        // 휴가 구분
+        ptoTypes: [],
+        applicatePtoType: '',
+        searchPtoType: '',
+
+        // 휴가 신청
+        applicateDates:[],
+        ptoApplication: {
+          employeeId: '',
+          startDate: '',
+          endDate: '',
+          applicateReason: '',
+          ptoType: ''
+          // 추후 결재 정보 추가 될 수 있음.
+        },
+
+        applicateReason: '',
+        cancelReason: '',
+
         // 휴가 취소 & 더미
         selectedCancelPtos: [],
         cancelHeaders: [
@@ -489,6 +515,12 @@ export default {
       methods: {
         loadData () {
           this.getUserInfo()
+          this.getPTOType ()
+        },
+        checkApplicateDates(dates){
+          console.log('1111111')
+          console.log(dates)
+          console.log('2222222')
         },
         viewDay ({ date }) {
           this.focus = date
@@ -552,13 +584,6 @@ export default {
         rnd (a, b) {
           return Math.floor((b - a + 1) * Math.random()) + a
         },
-        testAxios() {            
-            let userId = process.env.VUE_APP_TEST_USER_ID;
-            let apiUrl = this.$apiUrls.GET_PTO_INFO.replace('{id}',userId)
-            this.axios.get(apiUrl).then((response) => {
-              console.log(response.data)
-            })
-        },
         async getUserInfo () {
             let userId = process.env.VUE_APP_TEST_USER_ID;
             let apiUrl = this.$apiUrls.GET_PTO_INFO.replace('{id}',userId)
@@ -580,6 +605,26 @@ export default {
                 this.user.pto.all = data.payload.occurDays;
                 this.user.pto.unusedDays = data.payload.unusedDays;
                 this.user.pto.useDays = data.payload.useDays;
+
+              }else{
+                alert(data.errorMessage);
+              }
+            })
+        },
+        async getPTOType () {
+           
+            let apiUrl = this.$apiUrls.GET_PTO_TYPE
+            
+            await this.axios.get(apiUrl).then((response) => {
+
+
+              let data = response.data;
+              
+              if(data.isSuccess){
+                 this.ptoTypes = [];
+                 data.payload.forEach(element => {
+                  this.ptoTypes.push({name:element.codeName, value:element.code})   
+                 });
 
               }else{
                 alert(data.errorMessage);

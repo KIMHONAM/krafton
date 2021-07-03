@@ -3,7 +3,7 @@
         ref="menu"
         v-model="menu"
         :close-on-content-click="false"
-        :return-value.sync="date"
+        :return-value.sync="model"
         transition="scale-transition"
         offset-y
         min-width="auto"
@@ -38,7 +38,7 @@
           <v-btn
             text
             color="primary"
-            @click="$refs.menu.save(date)"
+            @click="$refs.menu.save(model)"
           >
             OK
           </v-btn>
@@ -55,28 +55,32 @@ export default {
     props: {
         paramDate: String,
         range: Boolean,
-        paramLabel: String
+        paramLabel: String,
+        paramDates: Array,
     },
     data () {
         return {
             date: this.paramDate ? this.paramDate : (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
-            dates:[(new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+            dates: this.paramDates ? this.paramDates : [(new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
                     (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)],
             menu: false,
             model: this.range ? this.dates : this.date,
             label: this.paramLabel ? this.paramLabel : '값을 입력해주세요.',
         }
     },
+    mounted () {
+      this.model = this.range ? this.dates : this.date
+    },
     methods: {
         allowedDates: val => new Date(val).getDay() !== 0 && new Date(val).getDay() !== 6 && !constants.HOLIDAY_MAP.has(val.replace(/-/gi,'')),
     },
-    mounted() {
-        console.log(typeof this.range)
+    watch: {
+      model(){ 
+        this.$emit('updateDate', this.model)
+      }
     },
     computed: {
         dateText () {
-            console.log(this.model)
-            console.log(this.range)
           return this.range ? (this.model ? this.model.join(' ~ ') : this.dates.join(' ~ ')) : (this.model ? this.model : this.date)
         },
     },
