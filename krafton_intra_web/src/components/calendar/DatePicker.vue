@@ -75,7 +75,7 @@ export default {
         allowedDates: val => new Date(val).getDay() !== 0 && new Date(val).getDay() !== 6 && !constants.HOLIDAY_MAP.has(val.replace(/-/gi,'')),
     },
     watch: {
-      model(){ 
+      model(){        
         this.$emit('updateDate', this.model)
       }
     },
