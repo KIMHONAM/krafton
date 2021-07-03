@@ -9,10 +9,14 @@ import '@babel/polyfill'
 import '@mdi/font/css/materialdesignicons.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import API_URLS from './constants/api_urls.js'
+import holiday from '@/constants/holiday'
 
 Vue.config.productionTip = false
 Vue.prototype.$apiUrls = API_URLS;
+Vue.prototype.$holiday = holiday;
 Vue.use(VueAxios, axios)
+Vue.use(require('vue-moment'))
+
 
 new Vue({
   router,
