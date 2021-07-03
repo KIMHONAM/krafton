@@ -122,7 +122,7 @@
             <v-container>
             <v-row>
             <v-col cols="12">
-                <date-picker :range="true" paramLabel="*연차 시작,종료일을 선택해주세요." @updateDate="checkApplicateDates"></date-picker>
+                <date-picker :range="true" paramLabel="*연차 시작,종료일을 선택해주세요." @updateDate="(d) => (applicateDates = d)"></date-picker>
               </v-col>
               <v-col cols="6"
                     sm="6"
@@ -198,10 +198,10 @@
                    </v-card-title>
     <v-row>
         <v-col cols="3">
-            <date-picker paramLabel="시작일" :paramDate="(new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10)"></date-picker>
+            <date-picker paramLabel="시작일" :paramDate="(new Date(new Date().getFullYear(),0,2)).toISOString().substr(0, 10)" @updateDate="(d) => (searchStartDate = d)" ></date-picker>
         </v-col>
         <v-col cols="3">
-            <date-picker paramLabel="종료일"></date-picker>
+            <date-picker paramLabel="종료일" @updateDate="(d) => (searchEndDate = d)"></date-picker>
         </v-col>
         <v-col cols="3">
             <v-select
@@ -447,8 +447,8 @@ export default {
           // 추후 결재 정보 추가 될 수 있음.
         },
 
-        applicateReason: '',
-        cancelReason: '',
+        searchStartDate: '',
+        searchEndDate: '',
 
         // 휴가 취소 & 더미
         selectedCancelPtos: [],
