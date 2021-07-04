@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS employee_pto_history (
 ) DEFAULT CHARSET=utf8 COMMENT='휴가 신청 내역 테이블';
 
 CREATE TABLE IF NOT EXISTS employee_pto_items (
-
+    id VARCHAR(30) COMMENT '개별내역 키',
 	employee_id INT(10) UNSIGNED NOT NULL COMMENT '휴가자 아이디',
 	pto_history_id VARCHAR(30) COMMENT '신청내역 키',
 	pto_date DATE NOT NULL COMMENT '휴가일',
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS employee_pto_items (
 	update_date DATETIME NULL COMMENT '수정일',
 	update_user INT(10) NULL COMMENT '수정자',
 
-	PRIMARY KEY (employee_id, pto_date, pto_type)
+	PRIMARY KEY (id)
 ) DEFAULT CHARSET=utf8 COMMENT='휴가 신청 개별 내역 테이블';
 
 CREATE TABLE IF NOT EXISTS common_code(
