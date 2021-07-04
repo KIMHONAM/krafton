@@ -18,6 +18,8 @@ INSERT INTO employee_pto_history (id,employee_id, start_date, end_date, reason, 
 INSERT INTO employee_pto_history (id,employee_id, start_date, end_date, reason, status, pto_type, pto_days, applicate_date, applicant, approver, approve_date, create_user) values('2_20210703184434',2,'2021-07-15 00:00:00','2021-07-15 00:00:00','병원 방문', 'PTOS000001', 'PTOT000002', 0.5, '2021-06-02 00:00:00', 1,1,'2021-06-02 00:00:00',2);
 INSERT INTO employee_pto_history (id,employee_id, start_date, end_date, reason, status, pto_type, pto_days, applicate_date, applicant, approver, approve_date, create_user, cancel_date,cancel_yn,cancel_reason, update_date) values('3_20210703184434',3,'2021-07-15 00:00:00','2021-07-15 00:00:00','병원 방문', 'PTOS000002', 'PTOT000002', 0.5, '2021-06-02 00:00:00', 1,1,'2021-06-02 00:00:00',3,'2021-06-28','Y','긴급 회의로 인해 휴가 취소','2021-06-28');
 
+INSERT INTO employee_pto_items (id,employee_id,pto_history_id,pto_date,pto_type,create_user)values('11111111111',1,'1_20210703184433','20210604','PTOT000001',1);
+INSERT INTO employee_pto_items (id,employee_id,pto_history_id,pto_date,pto_type,create_user)values('11111111112',1,'1_20210703184433','20210605','PTOT000001',1);
 INSERT INTO employee_pto_items (id,employee_id,pto_history_id,pto_date,pto_type,create_user)values('11111111',2,'2_20210703184433','20210716','PTOT000001',2);
 INSERT INTO employee_pto_items (id,employee_id,pto_history_id,pto_date,pto_type,create_user)values('22222222',2,'2_20210703184434','20210715','PTOT000002',2);
 
