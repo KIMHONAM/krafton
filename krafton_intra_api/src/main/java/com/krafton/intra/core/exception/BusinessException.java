@@ -1,6 +1,5 @@
 package com.krafton.intra.core.exception;
 
-import lombok.Data;
 import lombok.Getter;
 
 @Getter
@@ -16,7 +15,6 @@ public class BusinessException extends RuntimeException{
         super(errorCode);
         this.errorCode = errorCode;
     }
-
 
     public BusinessException(String errorCode, String errorMessage) {
         super(errorCode);

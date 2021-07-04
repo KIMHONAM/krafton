@@ -25,8 +25,8 @@ public class ServletConfiguration implements WebMvcConfigurer {
     public ReloadableResourceBundleMessageSource resourceBundleMessageSource(@Value("${error.message.reload.term}") int reloadTerm) {
         ReloadableResourceBundleMessageSource resourceBundleMessageSource = new ReloadableResourceBundleMessageSource();
         resourceBundleMessageSource.setCacheSeconds(reloadTerm);
-        resourceBundleMessageSource.setAlwaysUseMessageFormat(false); //인자가 없는 메시지도 MessageFormat 규칙 적용할지
-        resourceBundleMessageSource.setUseCodeAsDefaultMessage(true); //없는 메시지일 경우 Exception 발생시키는 대신 메시지 코드를 기본 메시지로 사용할지
+        resourceBundleMessageSource.setAlwaysUseMessageFormat(false);       //인자가 없는 메시지도 MessageFormat 규칙 적용할지
+        resourceBundleMessageSource.setUseCodeAsDefaultMessage(true);       //없는 메시지일 경우 Exception 발생시키는 대신 메시지 코드를 기본 메시지로 사용할지
         resourceBundleMessageSource.setDefaultEncoding(StandardCharsets.UTF_8.displayName()); //기본 인코딩
         resourceBundleMessageSource.setBasenames("classpath:message/messages", "classpath:message/error-messages");
         return resourceBundleMessageSource;

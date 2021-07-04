@@ -19,10 +19,10 @@ public class PTORequest {
         private String reason;
         private String status;
         private String applicateDate;   // 신청일
-        private int applicant;       // 신청자
-        private int approver;        // 승인자
+        private int applicant;          // 신청자
+        private int approver;           // 승인자
         private String approveDate;     // 승인일자
-        private float realUseDays;       // 신청자
+        private float realUseDays;      // 신청자
 
     }
 

@@ -57,5 +57,6 @@ public class PTOResponse {
         private String cancelDate;
         private String cancelReason;
         private String cancelYn;
+        private String applicateDate;
     }
 }

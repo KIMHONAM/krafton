@@ -4,7 +4,6 @@ import com.krafton.intra.core.dto.ApiResponse;
 import com.krafton.intra.core.dto.PagingRequest;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.service.PTOService;
-import com.krafton.intra.pto.service.PTOServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

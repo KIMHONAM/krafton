@@ -27,10 +27,16 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class PTOServiceImpl implements PTOService{
+public class PTOServiceImpl implements PTOService {
 
     private static final Logger LOGGER = LogManager.getLogger(PTOServiceImpl.class);
 
+    /**
+     * 휴가 신청 내역 조회
+     *
+     * @param pagingRequest
+     * @return
+     */
     @Override
     public PagingResponse getPTOHistory(PagingRequest<PTORequest.PaidTimeOffHistoryDto> pagingRequest) {
 
@@ -119,6 +125,8 @@ public class PTOServiceImpl implements PTOService{
         pto.setApproveDate(nowDateString);
 
         passedPTO.put("pto",pto);
+        passedPTO.put("employeeId",pto.getEmployeeId());
+
         ptoDao.insertPTOHistory(pto); // 휴가 이력 추가
         ptoDao.insertPTOItems(passedPTO);   // 휴가 개별 내역 생성
 
@@ -134,25 +142,39 @@ public class PTOServiceImpl implements PTOService{
         }else{
             summaryMap.put("occurDays",employeeInfo.getOccurDays());
             summaryMap.put("useDays",employeeInfo.getUseDays()+realUseDays);
-            summaryMap.put("unusedDays", employeeInfo.getOccurDays() - (employeeInfo.getUseDays()+realUseDays));
+            summaryMap.put("unusedDays", employeeInfo.getOccurDays() - (employeeInfo.getUseDays() + realUseDays));
         }
 
         int mergeSummaryResult = ptoDao.mergePTOSummary(summaryMap);
-        if(mergeSummaryResult != 2){    // insert into on duplicate key --> 정상 결과 : 2
+        if (mergeSummaryResult != 2) {    // insert into on duplicate key --> 정상 결과 : 2
             throw new BusinessException("ERR100010");   // 마지막 이력까지 정상 업데이트 실패 시 모두 롤백
         }
 
     }
 
+    /**
+     * 휴가 캘린터 일정 조회
+     *
+     * @param deptCode
+     * @param start
+     * @param end
+     * @return
+     */
     @Override
     public List<PTOResponse.PaidTimeOffCalenderDto> getPTOSchedule(String deptCode, String start, String end) {
-        Map<String,String> paramMap = new HashMap<>();
-        paramMap.put("deptCode",deptCode);
-        paramMap.put("start",start);
-        paramMap.put("end",end);
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("deptCode", deptCode);
+        paramMap.put("start", start);
+        paramMap.put("end", end);
         return ptoDao.getPTOSchedule(paramMap);
     }
 
+    /**
+     * 휴가 취소 가능 리스트 조회
+     *
+     * @param id
+     * @return
+     */
     @Override
     public List<PTOResponse.CancellablePaidTimeOffDto> getCancellablePTOs(int id) {
         return ptoDao.getCancellablePTOs(id);

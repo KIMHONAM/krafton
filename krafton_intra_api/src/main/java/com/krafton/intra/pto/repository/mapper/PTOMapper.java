@@ -1,7 +1,6 @@
 package com.krafton.intra.pto.repository.mapper;
 
 import com.krafton.intra.core.dto.PagingDto;
-import com.krafton.intra.employee.dto.EmployeeResponse;
 import com.krafton.intra.pto.dto.PTORequest;
 import com.krafton.intra.pto.dto.PTOResponse;
 import org.apache.ibatis.annotations.*;
