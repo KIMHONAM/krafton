@@ -14,9 +14,9 @@
               <v-container>
                 <v-row>
                   <v-col
-                    cols="9"
-                    sm="6"
-                    md="6"
+                    cols="4"
+                    sm="4"
+                    md="4"
                   >
                     <v-text-field
                       label="성명"
@@ -25,13 +25,24 @@
                     ></v-text-field>
                   </v-col>
                   <v-col
-                    cols="6"
-                    sm="6"
-                    md="6"
+                    cols="4"
+                    sm="4"
+                    md="4"
                   >
                     <v-text-field
                       label="사번"
                       v-model="user.compNo"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    sm="4"
+                    md="4"
+                  >
+                    <v-text-field
+                      label="직책"
+                      v-model="user.role"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -245,15 +256,15 @@
                 :loading="loading"
                 :server-items-length="ptoHistLenth"
                 :options.sync="ptoHistOptions"
-                v-model="ptoHistList"
+                v-model="historyGridItems"
                 class="elevation-1"
                 height="300px"
               >
               <template v-slot:no-data>
                   <v-alert :value="true" icon="info">
                     휴가 신청 내역이 없습니다.
-                  </v-alert>
-                </template>
+                  </v-alert> 
+              </template>
             </v-data-table>
         </v-col>
     </v-row>
@@ -503,7 +514,8 @@ export default {
         ptoHistPage: 0,
         ptoHistOptions: {},
         ptoHistLenth: 0,
-        footerProps: { 'items-per-page-options': [2, 5] },
+        footerProps: { 'items-per-page-options': [2] },
+        historyGridItems: [],
         totalPtoHeaders: [
           {
             text: '',
@@ -513,6 +525,7 @@ export default {
           { text: '상태', value: 'status' },
           { text: '시작일', value: 'startDate' },
           { text: '종료일', value: 'endDate' },
+          { text: '신청일', value: 'applicateDate' },
           { text: '일수', value: 'ptoDays' },
           { text: '휴가구분', value: 'ptoType' },
           { text: '휴가사유', value: 'reason' },
@@ -838,7 +851,7 @@ export default {
               this.endCancelRequest = false
               alert('서비스가 정상적으로 처리되지 않았습니다.')
             }).finally(() => {
-              this.selectedCancelPtos = '';
+              this.selectedCancelPtos = [];
             })
         },
         async getPTOHistories(){
@@ -847,7 +860,7 @@ export default {
           this.loading = false
         },
         async getPTOHistoriesAPI () {  // 휴가 신청 내역 조회 
-            const { sortBy, sortDesc, page, itemsPerPage} = this.ptoHistOptions
+            const { page, itemsPerPage} = this.ptoHistOptions
             this.countPost = itemsPerPage
             
             let userId = process.env.VUE_APP_TEST_USER_ID;
@@ -877,22 +890,7 @@ export default {
               this.loading = false;
             })
 
-            if (sortBy.length === 1 && sortDesc.length === 1) {
-              this.ptoHistList = this.ptoHistList.sort((a, b) => {
-                const sortA = a[sortBy[0]]
-                const sortB = b[sortBy[0]]
-
-                if (sortDesc[0]) {
-                  if (sortA < sortB) return 1
-                  if (sortA > sortB) return -1
-                  return 0
-                } else {
-                  if (sortA < sortB) return -1
-                  if (sortA > sortB) return 1
-                  return 0
-                }
-              })
-            }
+           
 
         },
         async getCalendarInfo (start, end) {  // 달력 일정 조회 - 같은 부서 포함
